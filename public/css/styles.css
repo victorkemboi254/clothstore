@@ -1338,4 +1338,26 @@ input:checked + .slider:before {
     flex-direction: column;
     align-items: stretch;
   }
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .product-card {
+    border-radius: var(--radius-sm);
+  }
+  .card-body {
+    padding: 12px;
+  }
+  .card-title {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  .quick-view-btn {
+    opacity: 1;
+    transform: none;
+    width: 34px;
+    height: 34px;
+    bottom: 8px;
+    right: 8px;
+  }
 }
