@@ -1,0 +1,14 @@
+{
+  "storeName": "VIBE APPAREL & KICKS",
+  "storePhone": "+254 712 345 678",
+  "adminPassword": "admin",
+  "currency": "KES",
+  "mpesa": {
+    "environment": "sandbox",
+    "shortcode": "",
+    "passkey": "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+    "consumerKey": "qwqnpMIMnmqvkJe2AUMAGFDfU0y1juIFhP3fPSSyVVGyG8rx",
+    "consumerSecret": "pSyBC1zUdAEQ7yfWGpqsqPjwZwGDI18iWiFUNe0g0OusYzJ1VyYWOdxIidRBbRDJ",
+    "callbackUrl": "https://mydomain.com/api/mpesa/callback"
+  }
+}

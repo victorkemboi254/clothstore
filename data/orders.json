@@ -1,0 +1,48 @@
+[
+  {
+    "orderId": "ORD-964773",
+    "checkoutRequestId": "ws_CO_20260730191604_2307",
+    "phone": "254712345678",
+    "amount": 2500,
+    "items": [],
+    "customerName": "Test User",
+    "status": "COMPLETED",
+    "mpesaReceiptNumber": "QRODT601K",
+    "createdAt": "2026-07-30T19:16:04.773Z",
+    "completedAt": "2026-07-30T19:16:10.783Z"
+  },
+  {
+    "orderId": "ORD-285983",
+    "checkoutRequestId": "ws_CO_20260730183125_3540",
+    "phone": "254712345678",
+    "amount": 2500,
+    "items": [],
+    "customerName": "Test",
+    "status": "COMPLETED",
+    "mpesaReceiptNumber": "QWOMF530K",
+    "createdAt": "2026-07-30T18:31:25.983Z",
+    "completedAt": "2026-07-30T18:31:33.225Z"
+  },
+  {
+    "orderId": "ORD-653095",
+    "checkoutRequestId": "ws_CO_20260730180413_1338",
+    "phone": "254718865742",
+    "amount": 2200,
+    "items": [
+      {
+        "id": "prod_2",
+        "title": "Stussy 8-Ball Vintage Brown Tee",
+        "price": 2200,
+        "image": "/assets/images/stussy_brown_tee.jpg",
+        "category": "T-Shirts",
+        "size": "S",
+        "quantity": 1
+      }
+    ],
+    "customerName": "Javier Mutai",
+    "status": "COMPLETED",
+    "mpesaReceiptNumber": "Q02OX251K",
+    "createdAt": "2026-07-30T18:04:13.095Z",
+    "completedAt": "2026-07-30T18:04:19.103Z"
+  }
+]

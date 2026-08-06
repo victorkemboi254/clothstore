@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIBE Apparel & Kicks | Premium Streetwear & Footwear Store</title>
+  <meta name="description" content="Shop exclusive streetwear, luxury graphic tees, track sets, knitwear, and premium sneakers with instant M-Pesa Daraja payment.">
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <!-- TOP PROMO BANNER -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <span><i class="fa-solid fa-truck-fast"></i> Express Delivery Across Kenya &nbsp;|&nbsp; Pay via Safaricom M-Pesa</span>
+      <div class="top-bar-links">
+        <a href="tel:+254712345678"><i class="fa-solid fa-phone"></i> +254 712 345 678</a>
+        <button id="openAdminBtn" class="admin-top-link"><i class="fa-solid fa-user-shield"></i> Admin Portal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="#" class="brand-logo">
+        <span class="logo-badge">VIBE</span>
+        <span class="logo-text">APPAREL & KICKS</span>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search T-shirts, Sets, Kicks, Sweaters...">
+        <button id="clearSearchBtn" class="clear-search-btn" hidden><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <button class="cart-trigger" id="cartBtn" aria-label="View Shopping Cart">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO BANNER SECTION -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="container hero-container">
+      <div class="hero-text">
+        <span class="hero-tag"><i class="fa-solid fa-fire"></i> NEW DROPS 2026</span>
+        <h1>STREETWEAR &amp; KICKS CATALOGUE</h1>
+        <p>Discover premium graphic tees, 3-piece short sets, knitted sweaters, and authentic retro kicks. Fast order processing with M-Pesa STK Push payment.</p>
+        <div class="hero-buttons">
+          <a href="#shopSection" class="btn btn-gold"><i class="fa-solid fa-compass"></i> Explore Collection</a>
+          <button class="btn btn-outline" id="heroAdminBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Admin Upload</button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <h3>100%</h3>
+          <p>Authentic Quality</p>
+        </div>
+        <div class="stat-card">
+          <h3>M-PESA</h3>
+          <p>Instant STK Push</p>
+        </div>
+        <div class="stat-card">
+          <h3>24/7</h3>
+          <p>Fast Dispatch</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="container main-content" id="shopSection">
+
+    <!-- CATEGORY & FILTER CONTROLS -->
+    <div class="filter-wrapper">
+      <div class="category-tabs" id="categoryTabs">
+        <button class="tab-btn active" data-category="All"><i class="fa-solid fa-grip"></i> All Items</button>
+        <button class="tab-btn" data-category="T-Shirts"><i class="fa-solid fa-shirt"></i> T-Shirts</button>
+        <button class="tab-btn" data-category="Sets & Suits"><i class="fa-solid fa-layer-group"></i> Sets &amp; Suits</button>
+        <button class="tab-btn" data-category="Sweaters & Hoodies"><i class="fa-solid fa-vest"></i> Sweaters &amp; Hoodies</button>
+        <button class="tab-btn" data-category="Shoes & Kicks"><i class="fa-solid fa-shoe-prints"></i> Shoes &amp; Kicks</button>
+      </div>
+
+      <div class="filter-controls">
+        <div class="sort-box">
+          <label for="sortSelect"><i class="fa-solid fa-arrow-down-short-wide"></i> Sort:</label>
+          <select id="sortSelect">
+            <option value="featured">Featured Drops</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name-asc">Name: A to Z</option>
+          </select>
+        </div>
+
+        <div class="stock-toggle-box">
+          <label class="toggle-switch">
+            <input type="checkbox" id="inStockOnlyCheck">
+            <span class="slider"></span>
+          </label>
+          <span>In Stock Only</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS GRID -->
+    <div class="product-grid" id="productGrid">
+      <!-- Dynamically generated via app.js -->
+    </div>
+
+    <!-- NO RESULTS FEEDBACK -->
+    <div class="no-results" id="noResults" style="display: none;">
+      <i class="fa-solid fa-shirt-long-slash"></i>
+      <h3>No items found matching your filter</h3>
+      <p>Try searching for a different keyword or category.</p>
+      <button class="btn btn-outline" id="resetFiltersBtn">Reset All Filters</button>
+    </div>
+
+  </main>
+
+  <!-- QUICK VIEW PRODUCT MODAL -->
+  <div class="modal-backdrop" id="quickViewModal">
+    <div class="modal-card modal-lg">
+      <button class="modal-close" id="closeQuickView"><i class="fa-solid fa-xmark"></i></button>
+      <div class="quick-view-content">
+        <div class="quick-view-media">
+          <img id="qvImage" src="" alt="Product Detail">
+        </div>
+        <div class="quick-view-details">
+          <span class="qv-category" id="qvCategory">Category</span>
+          <h2 class="qv-title" id="qvTitle">Product Title</h2>
+          <div class="qv-price" id="qvPrice">KES 0</div>
+          <p class="qv-description" id="qvDescription">Description here...</p>
+
+          <div class="qv-option-group">
+            <label>Select Size:</label>
+            <div class="size-selector" id="qvSizesContainer">
+              <!-- Size pills injected dynamically -->
+            </div>
+          </div>
+
+          <div class="qv-option-group">
+            <label>Quantity:</label>
+            <div class="quantity-control">
+              <button id="qvMinusBtn"><i class="fa-solid fa-minus"></i></button>
+              <input type="number" id="qvQtyInput" value="1" min="1" max="10">
+              <button id="qvPlusBtn"><i class="fa-solid fa-plus"></i></button>
+            </div>
+          </div>
+
+          <div class="qv-actions">
+            <button class="btn btn-gold btn-full" id="qvAddToCartBtn">
+              <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOPPING CART DRAWER -->
+  <div class="cart-drawer-backdrop" id="cartDrawerBackdrop">
+    <div class="cart-drawer" id="cartDrawer">
+      <div class="cart-drawer-header">
+        <h2><i class="fa-solid fa-bag-shopping"></i> Your Shopping Bag</h2>
+        <button class="modal-close" id="closeCartDrawer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="cart-drawer-body" id="cartItemsContainer">
+        <!-- Cart items dynamically rendered -->
+      </div>
+
+      <div class="cart-drawer-footer">
+        <div class="cart-summary-line">
+          <span>Subtotal</span>
+          <strong id="cartSubtotal">KES 0</strong>
+        </div>
+        <div class="cart-summary-line">
+          <span>Delivery (Kenya-wide)</span>
+          <strong class="free-shipping">Calculated at Checkout</strong>
+        </div>
+        <div class="cart-summary-line total-line">
+          <span>Total Payable</span>
+          <strong id="cartTotal">KES 0</strong>
+        </div>
+
+        <button class="btn btn-mpesa btn-full" id="proceedMpesaBtn">
+          <i class="fa-solid fa-mobile-screen-button"></i> Pay via Safaricom M-Pesa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- M-PESA STK PUSH PAYMENT MODAL -->
+  <div class="modal-backdrop" id="mpesaModal">
+    <div class="modal-card modal-md">
+      <button class="modal-close" id="closeMpesaModal"><i class="fa-solid fa-xmark"></i></button>
+      
+      <!-- STK Step 1: Input Details -->
+      <div id="mpesaStep1" class="mpesa-step">
+        <div class="mpesa-header-badge">
+          <i class="fa-solid fa-mobile-retro"></i>
+          <span>SAFARICOM M-PESA DARAJA</span>
+        </div>
+        <h2>Instant M-Pesa Payment</h2>
+        <p class="mpesa-subtext">Enter your M-Pesa registered phone number below. You will receive an instant popup on your phone to enter your PIN.</p>
+        
+        <div class="order-summary-mini">
+          <div class="summary-row">
+            <span>Total Items:</span>
+            <strong id="mpesaItemCount">0 items</strong>
+          </div>
+          <div class="summary-row highlight">
+            <span>Amount to Pay:</span>
+            <strong id="mpesaAmount">KES 0</strong>
+          </div>
+        </div>
+
+        <form id="mpesaForm" class="mpesa-form">
+          <div class="form-group">
+            <label for="customerPhone"><i class="fa-solid fa-phone"></i> M-Pesa Phone Number:</label>
+            <div class="phone-input-group">
+              <span class="country-code">+254</span>
+              <input type="tel" id="customerPhone" placeholder="712345678 or 0712345678" required>
+            </div>
+            <small>Format: 07XXXXXXXX, 01XXXXXXXX, or 7XXXXXXXX</small>
+          </div>
+
+          <div class="form-group">
+            <label for="customerName"><i class="fa-solid fa-user"></i> Full Name / Delivery Contact:</label>
+            <input type="text" id="customerName" placeholder="e.g. John Kamau" required>
+          </div>
+
+          <button type="submit" class="btn btn-mpesa btn-full btn-lg" id="sendStkBtn">
+            <i class="fa-solid fa-paper-plane"></i> Send STK Push Prompt
+          </button>
+        </form>
+      </div>
+
+      <!-- STK Step 2: Live Prompt Simulation -->
+      <div id="mpesaStep2" class="mpesa-step" style="display: none;">
+        <div class="stk-prompt-wrapper">
+          <div class="stk-phone-mockup">
+            <div class="phone-screen">
+              <div class="stk-dialog">
+                <div class="stk-header"><i class="fa-solid fa-shield-halved"></i> SIM Toolkit / M-PESA</div>
+                <div class="stk-body">
+                  <p class="stk-title">Do you want to pay KES <span id="stkSimAmount">0</span> to <strong>VIBE STREETWEAR</strong>?</p>
+                  <p class="stk-instruction">Enter your 4-Digit M-Pesa PIN on your phone handset screen.</p>
+                  <div class="stk-pin-dots">
+                    <span></span><span></span><span></span><span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stk-status-box">
+            <div class="spinner-ring"></div>
+            <h3>Waiting for PIN Input...</h3>
+            <p id="stkMessageText">Check your phone (+254...) and authorize payment.</p>
+            <div class="stk-timer">Timeout in <span id="stkCountdown">30</span>s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STK Step 3: Success Receipt -->
+      <div id="mpesaStep3" class="mpesa-step" style="display: none;">
+        <div class="receipt-card">
+          <div class="receipt-icon success">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h2>Payment Received!</h2>
+          <p class="receipt-sub">Your order has been confirmed via M-Pesa Daraja.</p>
+
+          <div class="receipt-details">
+            <div class="receipt-row">
+              <span>M-Pesa Receipt Code:</span>
+              <strong id="receiptMpesaCode" class="mpesa-code-text">QK892719K</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Amount Paid:</span>
+              <strong id="receiptAmount">KES 0</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Customer Phone:</span>
+              <strong id="receiptPhone">+254...</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Date &amp; Time:</span>
+              <strong id="receiptTime">Just now</strong>
+            </div>
+          </div>
+
+          <button class="btn btn-gold btn-full" id="closeReceiptBtn"><i class="fa-solid fa-check"></i> Return to Store</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ADMIN PORTAL MODAL -->
+  <div class="modal-backdrop" id="adminModal">
+    <div class="modal-card modal-xl">
+      <button class="modal-close" id="closeAdminModal"><i class="fa-solid fa-xmark"></i></button>
+      
+      <!-- Admin Login Box (If not authenticated) -->
+      <div id="adminLoginView" class="admin-view">
+        <div class="admin-login-card">
+          <div class="admin-badge"><i class="fa-solid fa-lock"></i></div>
+          <h2>Admin Authentication</h2>
+          <p>Log in to manage catalog items, view M-Pesa sales, and update prices.</p>
+          
+          <form id="adminLoginForm">
+            <div class="form-group">
+              <label for="adminPass">Password:</label>
+              <input type="password" id="adminPass" placeholder="Enter admin password..." required>
+              <small>Default password: <code>admin</code></small>
+            </div>
+            <button type="submit" class="btn btn-gold btn-full"><i class="fa-solid fa-key"></i> Log In to Portal</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Admin Dashboard (If authenticated) -->
+      <div id="adminDashboardView" class="admin-view" style="display: none;">
+        <div class="admin-header">
+          <div class="admin-title">
+            <h2><i class="fa-solid fa-sliders"></i> Store Management Portal</h2>
+            <span class="auth-status-badge"><i class="fa-solid fa-circle-check"></i> Authorized</span>
+          </div>
+          <button class="btn btn-outline btn-sm" id="adminLogoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+
+        <!-- Admin Nav Tabs -->
+        <div class="admin-tabs">
+          <button class="admin-tab-btn active" data-admintab="add-item"><i class="fa-solid fa-plus-circle"></i> Add New Product</button>
+          <button class="admin-tab-btn" data-admintab="inventory"><i class="fa-solid fa-boxes-stacked"></i> Inventory List</button>
+          <button class="admin-tab-btn" data-admintab="orders"><i class="fa-solid fa-receipt"></i> M-Pesa Orders</button>
+          <button class="admin-tab-btn" data-admintab="settings"><i class="fa-solid fa-gear"></i> Daraja M-Pesa Config</button>
+        </div>
+
+        <div class="admin-tab-contents">
+
+          <!-- TAB 1: ADD NEW PRODUCT -->
+          <div class="admin-tab-panel active" id="tab-add-item">
+            <form id="addProductForm" class="admin-grid-form" enctype="multipart/form-data">
+              <div class="form-section">
+                <h3>Product Details</h3>
+                <div class="form-group">
+                  <label for="prodTitle">Product Name / Title:</label>
+                  <input type="text" id="prodTitle" placeholder="e.g. Chrome Hearts Rhinestone Tee" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="prodCategory">Category:</label>
+                    <select id="prodCategory" required>
+                      <option value="T-Shirts">T-Shirts</option>
+                      <option value="Sets & Suits">Sets &amp; Suits</option>
+                      <option value="Sweaters & Hoodies">Sweaters &amp; Hoodies</option>
+                      <option value="Shoes & Kicks">Shoes &amp; Kicks</option>
+                      <option value="Pants">Pants</option>
+                      <option value="Accessories">Accessories</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="prodPrice">Price in KES:</label>
+                    <input type="number" id="prodPrice" placeholder="2500" required step="50" min="0">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="prodDescription">Description:</label>
+                  <textarea id="prodDescription" rows="3" placeholder="Enter product fabric details, fit, embroidery specs..."></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="prodSizes">Sizes (comma separated):</label>
+                    <input type="text" id="prodSizes" placeholder="S, M, L, XL, XXL or EU 40, EU 41, EU 42">
+                  </div>
+                  <div class="form-group">
+                    <label for="prodStockQty">Stock Quantity:</label>
+                    <input type="number" id="prodStockQty" value="10" min="0">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h3>Product Image &amp; Tags</h3>
+                <div class="form-group">
+                  <label>Upload Image File:</label>
+                  <div class="file-upload-box">
+                    <input type="file" id="prodImageFile" accept="image/*">
+                    <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                    <p>Click or drag image file here</p>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="prodImageUrl">OR Image URL:</label>
+                  <input type="text" id="prodImageUrl" placeholder="https://example.com/item.jpg">
+                </div>
+                <div class="form-group">
+                  <label for="prodTags">Tags (comma separated):</label>
+                  <input type="text" id="prodTags" placeholder="Rhinestone, Oversized, Bestseller">
+                </div>
+                <div class="form-group checkbox-group">
+                  <label><input type="checkbox" id="prodFeatured" checked> Show in Featured Drops</label>
+                </div>
+
+                <button type="submit" class="btn btn-gold btn-full btn-lg"><i class="fa-solid fa-floppy-disk"></i> Save &amp; Display in Store</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- TAB 2: INVENTORY LIST -->
+          <div class="admin-tab-panel" id="tab-inventory">
+            <div class="inventory-header">
+              <input type="text" id="inventorySearch" placeholder="Search inventory by title or category...">
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Price (KES)</th>
+                    <th>Stock Qty</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                  <!-- Injected via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 3: ORDERS LOG -->
+          <div class="admin-tab-panel" id="tab-orders">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Date &amp; Time</th>
+                    <th>Receipt Code</th>
+                    <th>Phone</th>
+                    <th>Customer Name</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                  <!-- Injected via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 4: SAFARICOM DARAJA SETTINGS -->
+          <div class="admin-tab-panel" id="tab-settings">
+            <form id="darajaConfigForm" class="admin-grid-form">
+              <div class="form-section">
+                <h3>Safaricom Daraja API Keys</h3>
+                <div class="form-group">
+                  <label for="cfgEnv">Environment Mode:</label>
+                  <select id="cfgEnv">
+                    <option value="sandbox">Sandbox (Testing / Demo Simulation)</option>
+                    <option value="production">Production (Live M-Pesa Accounts)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="cfgShortcode">Business ShortCode / Till / Paybill:</label>
+                  <input type="text" id="cfgShortcode" placeholder="174379">
+                </div>
+                <div class="form-group">
+                  <label for="cfgConsumerKey">Consumer Key:</label>
+                  <input type="text" id="cfgConsumerKey" placeholder="Paste Daraja Consumer Key...">
+                </div>
+                <div class="form-group">
+                  <label for="cfgConsumerSecret">Consumer Secret:</label>
+                  <input type="password" id="cfgConsumerSecret" placeholder="Paste Daraja Consumer Secret...">
+                </div>
+                <div class="form-group">
+                  <label for="cfgPasskey">LIPA NA M-PESA Online Passkey:</label>
+                  <input type="password" id="cfgPasskey" placeholder="Paste Passkey...">
+                </div>
+                <div class="form-group">
+                  <label for="cfgCallbackUrl">Callback URL (Webhook):</label>
+                  <input type="url" id="cfgCallbackUrl" placeholder="https://yourdomain.com/api/mpesa/callback">
+                </div>
+                <div class="form-actions" style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
+                  <button type="submit" class="btn btn-gold"><i class="fa-solid fa-check-double"></i> Save Credentials</button>
+                  <button type="button" id="resetSimulatorBtn" class="btn btn-outline" style="border-color: var(--gold-primary); color: var(--gold-primary);">
+                    <i class="fa-solid fa-rotate-left"></i> Clear Keys &amp; Use Simulator
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h3>Store Settings</h3>
+                <div class="form-group">
+                  <label for="cfgStoreName">Store Name:</label>
+                  <input type="text" id="cfgStoreName" value="VIBE APPAREL & KICKS">
+                </div>
+                <div class="form-group">
+                  <label for="cfgNewPass">Change Admin Password:</label>
+                  <input type="password" id="cfgNewPass" placeholder="Enter new password...">
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <span class="logo-badge">VIBE</span>
+        <p>Premium Streetwear Apparel &amp; Kicks Store. Powered by Safaricom M-Pesa Daraja payment integration.</p>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 VIBE APPAREL &amp; KICKS. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
