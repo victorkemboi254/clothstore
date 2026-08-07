@@ -3,6 +3,10 @@
   "storePhone": "+254 712 345 678",
   "adminPassword": "admin",
   "currency": "KES",
+  "cloudinary": {
+    "cloudName": "yvbo2mtt",
+    "uploadPreset": "clothstore_preset"
+  },
   "mpesa": {
     "environment": "sandbox",
     "shortcode": "",

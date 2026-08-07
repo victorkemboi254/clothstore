@@ -764,9 +764,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let localDataUrl = null;
     let cloudinaryUrl = null;
 
-    // Check Cloudinary Credentials
-    const cldCloud = localStorage.getItem('vibe_cloudinary_cloud_name');
-    const cldPreset = localStorage.getItem('vibe_cloudinary_preset');
+    // Check Cloudinary Credentials (Defaults to pre-configured yvbo2mtt & clothstore_preset)
+    const cldCloud = localStorage.getItem('vibe_cloudinary_cloud_name') || 'yvbo2mtt';
+    const cldPreset = localStorage.getItem('vibe_cloudinary_preset') || 'clothstore_preset';
 
     if (fileInput.files.length > 0) {
       // 1. Try Cloudinary direct upload if configured
@@ -918,10 +918,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (document.getElementById('cfgCloudinaryCloudName')) {
-      document.getElementById('cfgCloudinaryCloudName').value = localStorage.getItem('vibe_cloudinary_cloud_name') || '';
+      document.getElementById('cfgCloudinaryCloudName').value = localStorage.getItem('vibe_cloudinary_cloud_name') || 'yvbo2mtt';
     }
     if (document.getElementById('cfgCloudinaryPreset')) {
-      document.getElementById('cfgCloudinaryPreset').value = localStorage.getItem('vibe_cloudinary_preset') || '';
+      document.getElementById('cfgCloudinaryPreset').value = localStorage.getItem('vibe_cloudinary_preset') || 'clothstore_preset';
     }
   }
 
