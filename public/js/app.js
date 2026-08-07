@@ -249,34 +249,42 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
   }
 
-  // --- API FETCHERS ---
   async function fetchProducts() {
+    let fetchedList = [];
     try {
       const res = await fetch('/api/products');
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          products = data;
-        } else {
-          products = DEFAULT_PRODUCTS;
+          fetchedList = data;
         }
-      } else {
-        products = DEFAULT_PRODUCTS;
       }
     } catch (err) {
       console.warn('Failed to fetch from backend API, attempting static fallback:', err);
+    }
+
+    if (fetchedList.length === 0) {
       try {
         const staticRes = await fetch('data/products.json');
         if (staticRes.ok) {
           const staticData = await staticRes.json();
-          products = (Array.isArray(staticData) && staticData.length > 0) ? staticData : DEFAULT_PRODUCTS;
-        } else {
-          products = DEFAULT_PRODUCTS;
+          if (Array.isArray(staticData) && staticData.length > 0) {
+            fetchedList = staticData;
+          }
         }
-      } catch (staticErr) {
-        products = DEFAULT_PRODUCTS;
-      }
+      } catch (staticErr) {}
     }
+
+    if (fetchedList.length === 0) {
+      fetchedList = [...DEFAULT_PRODUCTS];
+    }
+
+    // Merge custom listings saved in localStorage
+    const localCustom = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+    const existingIds = new Set(fetchedList.map(p => p.id));
+    const missingCustom = localCustom.filter(p => !existingIds.has(p.id));
+
+    products = [...missingCustom, ...fetchedList];
     renderCatalog();
   }
 
@@ -698,21 +706,49 @@ document.addEventListener('DOMContentLoaded', () => {
   async function handleAddProduct(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('title', document.getElementById('prodTitle').value.trim());
-    formData.append('category', document.getElementById('prodCategory').value);
-    formData.append('price', document.getElementById('prodPrice').value);
-    formData.append('description', document.getElementById('prodDescription').value.trim());
-    formData.append('sizes', document.getElementById('prodSizes').value.trim());
-    formData.append('stockQty', document.getElementById('prodStockQty').value);
-    formData.append('imageUrl', document.getElementById('prodImageUrl').value.trim());
-    formData.append('tags', document.getElementById('prodTags').value.trim());
-    formData.append('featured', document.getElementById('prodFeatured').checked);
+    const title = document.getElementById('prodTitle').value.trim();
+    const category = document.getElementById('prodCategory').value;
+    const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+    const description = document.getElementById('prodDescription').value.trim();
+    const sizesRaw = document.getElementById('prodSizes').value.trim();
+    const stockQty = parseInt(document.getElementById('prodStockQty').value) || 10;
+    const imageUrl = document.getElementById('prodImageUrl').value.trim();
+    const tagsRaw = document.getElementById('prodTags').value.trim();
+    const featured = document.getElementById('prodFeatured').checked;
+
+    const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : ['S', 'M', 'L', 'XL'];
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : ['New Drop'];
 
     const fileInput = document.getElementById('prodImageFile');
+
+    let localDataUrl = null;
+    if (fileInput.files.length > 0) {
+      try {
+        localDataUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (evt) => resolve(evt.target.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(fileInput.files[0]);
+        });
+      } catch (err) {}
+    }
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('category', category);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('sizes', JSON.stringify(sizes));
+    formData.append('stockQty', stockQty);
+    formData.append('imageUrl', imageUrl);
+    formData.append('tags', JSON.stringify(tags));
+    formData.append('featured', featured);
+
     if (fileInput.files.length > 0) {
       formData.append('imageFile', fileInput.files[0]);
     }
+
+    let createdProduct = null;
 
     try {
       const res = await fetch('/api/products', {
@@ -720,18 +756,44 @@ document.addEventListener('DOMContentLoaded', () => {
         body: formData
       });
 
-      const data = await res.json();
-      if (data.success) {
-        alert('Product added successfully!');
-        addProductForm.reset();
-        await fetchProducts();
-        renderInventoryTable();
-      } else {
-        alert('Failed to add product: ' + data.message);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.product) {
+          createdProduct = data.product;
+        }
       }
     } catch (err) {
-      alert('Error uploading product: ' + err.message);
+      console.warn('Backend upload failed, creating product locally:', err);
     }
+
+    if (!createdProduct) {
+      createdProduct = {
+        id: 'prod_' + Date.now(),
+        title: title || 'New Streetwear Item',
+        category: category || 'T-Shirts',
+        price: price,
+        image: localDataUrl || imageUrl || 'assets/images/chrome_hearts_black_tee.jpg',
+        description: description,
+        sizes: sizes,
+        inStock: true,
+        stockQty: stockQty,
+        featured: featured,
+        tags: tags,
+        createdAt: new Date().toISOString()
+      };
+    } else if (localDataUrl && (!createdProduct.image || createdProduct.image.startsWith('/assets/'))) {
+      createdProduct.image = localDataUrl;
+    }
+
+    // Save to localStorage so custom products never vanish
+    const customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+    customProducts.unshift(createdProduct);
+    localStorage.setItem('vibe_custom_products', JSON.stringify(customProducts));
+
+    alert('Product added successfully!');
+    addProductForm.reset();
+    await fetchProducts();
+    renderInventoryTable();
   }
 
   async function loadOrdersTable() {
@@ -997,7 +1059,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (deleteBtn) {
         const prodId = deleteBtn.dataset.id;
         if (confirm('Are you sure you want to delete this product?')) {
-          await fetch('/api/products/' + prodId, { method: 'DELETE' });
+          let customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+          customProducts = customProducts.filter(p => p.id !== prodId);
+          localStorage.setItem('vibe_custom_products', JSON.stringify(customProducts));
+
+          try {
+            await fetch('/api/products/' + prodId, { method: 'DELETE' });
+          } catch (err) {}
+
           await fetchProducts();
           renderInventoryTable();
         }
