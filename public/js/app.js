@@ -229,6 +229,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
+  function compressImageFile(file, maxWidth = 800, maxHeight = 800, quality = 0.75) {
+    return new Promise((resolve) => {
+      if (!file || !file.type || !file.type.startsWith('image/')) {
+        resolve(null);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth || height > maxHeight) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = () => resolve(null);
+        img.src = e.target.result;
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+  }
+
   function getImageUrl(imgPath) {
     if (!imgPath) return 'assets/images/chrome_hearts_black_tee.jpg';
     let clean = imgPath.trim();
@@ -724,13 +764,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let localDataUrl = null;
     if (fileInput.files.length > 0) {
       try {
-        localDataUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (evt) => resolve(evt.target.result);
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(fileInput.files[0]);
-        });
-      } catch (err) {}
+        localDataUrl = await compressImageFile(fileInput.files[0], 800, 800, 0.75);
+      } catch (err) {
+        console.warn('Image compression error:', err);
+      }
     }
 
     const formData = new FormData();
