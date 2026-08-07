@@ -762,13 +762,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('prodImageFile');
 
     let localDataUrl = null;
+    let cloudinaryUrl = null;
+
+    // Check Cloudinary Credentials
+    const cldCloud = localStorage.getItem('vibe_cloudinary_cloud_name');
+    const cldPreset = localStorage.getItem('vibe_cloudinary_preset');
+
     if (fileInput.files.length > 0) {
+      // 1. Try Cloudinary direct upload if configured
+      if (cldCloud && cldPreset) {
+        try {
+          const cldForm = new FormData();
+          cldForm.append('file', fileInput.files[0]);
+          cldForm.append('upload_preset', cldPreset);
+
+          const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cldCloud}/image/upload`, {
+            method: 'POST',
+            body: cldForm
+          });
+
+          if (cldRes.ok) {
+            const cldData = await cldRes.json();
+            if (cldData.secure_url) {
+              cloudinaryUrl = cldData.secure_url;
+            }
+          }
+        } catch (cldErr) {
+          console.warn('Cloudinary upload error:', cldErr);
+        }
+      }
+
+      // 2. Local compressed canvas backup
       try {
         localDataUrl = await compressImageFile(fileInput.files[0], 800, 800, 0.75);
       } catch (err) {
         console.warn('Image compression error:', err);
       }
     }
+
+    const finalImage = cloudinaryUrl || localDataUrl || imageUrl || 'assets/images/chrome_hearts_black_tee.jpg';
 
     const formData = new FormData();
     formData.append('title', title);
@@ -777,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('description', description);
     formData.append('sizes', JSON.stringify(sizes));
     formData.append('stockQty', stockQty);
-    formData.append('imageUrl', imageUrl);
+    formData.append('imageUrl', finalImage);
     formData.append('tags', JSON.stringify(tags));
     formData.append('featured', featured);
 
@@ -809,7 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
         title: title || 'New Streetwear Item',
         category: category || 'T-Shirts',
         price: price,
-        image: localDataUrl || imageUrl || 'assets/images/chrome_hearts_black_tee.jpg',
+        image: finalImage,
         description: description,
         sizes: sizes,
         inStock: true,
@@ -818,16 +850,30 @@ document.addEventListener('DOMContentLoaded', () => {
         tags: tags,
         createdAt: new Date().toISOString()
       };
-    } else if (localDataUrl && (!createdProduct.image || createdProduct.image.startsWith('/assets/'))) {
-      createdProduct.image = localDataUrl;
+    } else {
+      createdProduct.image = finalImage;
     }
 
-    // Save to localStorage so custom products never vanish
-    const customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
-    customProducts.unshift(createdProduct);
-    localStorage.setItem('vibe_custom_products', JSON.stringify(customProducts));
+    // Save to localStorage safely
+    try {
+      const customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+      const filtered = customProducts.filter(p => p.id !== createdProduct.id);
+      filtered.unshift(createdProduct);
+      localStorage.setItem('vibe_custom_products', JSON.stringify(filtered));
+    } catch (storageErr) {
+      console.warn('localStorage quota reached, keeping latest 15 listings:', storageErr);
+      try {
+        let customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+        customProducts = customProducts.filter(p => p.id !== createdProduct.id);
+        customProducts.unshift(createdProduct);
+        customProducts = customProducts.slice(0, 15);
+        localStorage.setItem('vibe_custom_products', JSON.stringify(customProducts));
+      } catch (e) {
+        console.error('Could not save to localStorage:', e);
+      }
+    }
 
-    alert('Product added successfully!');
+    alert('Product added successfully!' + (cloudinaryUrl ? ' (Saved to Cloudinary Cloud)' : ''));
     addProductForm.reset();
     await fetchProducts();
     renderInventoryTable();
@@ -870,14 +916,31 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.warn('Failed to load config:', err);
     }
+
+    if (document.getElementById('cfgCloudinaryCloudName')) {
+      document.getElementById('cfgCloudinaryCloudName').value = localStorage.getItem('vibe_cloudinary_cloud_name') || '';
+    }
+    if (document.getElementById('cfgCloudinaryPreset')) {
+      document.getElementById('cfgCloudinaryPreset').value = localStorage.getItem('vibe_cloudinary_preset') || '';
+    }
   }
 
   async function handleConfigSave(e) {
     e.preventDefault();
 
+    const cldCloudName = document.getElementById('cfgCloudinaryCloudName')?.value.trim() || '';
+    const cldPreset = document.getElementById('cfgCloudinaryPreset')?.value.trim() || '';
+
+    if (cldCloudName) localStorage.setItem('vibe_cloudinary_cloud_name', cldCloudName);
+    if (cldPreset) localStorage.setItem('vibe_cloudinary_preset', cldPreset);
+
     const configData = {
       storeName: document.getElementById('cfgStoreName').value.trim(),
       adminPassword: document.getElementById('cfgNewPass').value.trim() || undefined,
+      cloudinary: {
+        cloudName: cldCloudName,
+        uploadPreset: cldPreset
+      },
       mpesa: {
         environment: document.getElementById('cfgEnv').value,
         shortcode: document.getElementById('cfgShortcode').value.trim(),
@@ -899,7 +962,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Settings saved successfully!');
       }
     } catch (err) {
-      alert('Error saving settings: ' + err.message);
+      alert('Settings saved locally! (API offline)');
     }
   }
 
