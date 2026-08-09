@@ -82,6 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminLoginForm = document.getElementById('adminLoginForm');
   const adminLogoutBtn = document.getElementById('adminLogoutBtn');
   const addProductForm = document.getElementById('addProductForm');
+  const colorVariantsList = document.getElementById('colorVariantsList');
+  const addColorVariantBtn = document.getElementById('addColorVariantBtn');
+
+  function addColorVariantRow(name = '', hex = '#E5C158') {
+    if (!colorVariantsList) return;
+    const row = document.createElement('div');
+    row.className = 'color-variant-row';
+    row.style.cssText = 'display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);';
+    row.innerHTML = `
+      <input type="text" class="cvar-name" value="${name}" placeholder="Color Name (e.g. Royal Blue)" style="flex: 1; padding: 6px 10px; font-size: 0.85rem; border-radius: var(--radius-sm); background: #000; border: 1px solid var(--border-color); color: #fff;">
+      <input type="color" class="cvar-hex" value="${hex}" style="width: 38px; height: 34px; padding: 2px; border-radius: 4px; border: 0; cursor: pointer; background: transparent;">
+      <input type="file" class="cvar-file" accept="image/*" style="flex: 1.2; font-size: 0.75rem; color: var(--text-muted);">
+      <button type="button" class="remove-cvar-btn" style="color: #EF4444; background: none; border: 0; cursor: pointer; font-size: 1rem; padding: 4px;"><i class="fa-solid fa-trash"></i></button>
+    `;
+    colorVariantsList.appendChild(row);
+  }
+
+  if (addColorVariantBtn) {
+    addColorVariantBtn.addEventListener('click', () => addColorVariantRow());
+  }
+
+  if (colorVariantsList) {
+    colorVariantsList.addEventListener('click', (e) => {
+      const rmBtn = e.target.closest('.remove-cvar-btn');
+      if (rmBtn) {
+        const row = rmBtn.closest('.color-variant-row');
+        if (row) row.remove();
+      }
+    });
+  }
   const inventoryTableBody = document.getElementById('inventoryTableBody');
   const inventorySearch = document.getElementById('inventorySearch');
   const ordersTableBody = document.getElementById('ordersTableBody');
@@ -857,16 +887,70 @@ document.addEventListener('DOMContentLoaded', () => {
       uploadedImages = [...uploadedImages, ...extraUrls];
     }
 
+    // Colors & photos mapping
+    const colors = [];
+    const colorRows = colorVariantsList ? colorVariantsList.querySelectorAll('.color-variant-row') : [];
+
+    for (let row of colorRows) {
+      const cNameInput = row.querySelector('.cvar-name');
+      const cHexInput = row.querySelector('.cvar-hex');
+      const cFileInput = row.querySelector('.cvar-file');
+
+      const cName = cNameInput ? cNameInput.value.trim() : '';
+      const cHex = cHexInput ? cHexInput.value : '#E5C158';
+      const cFile = cFileInput && cFileInput.files.length > 0 ? cFileInput.files[0] : null;
+
+      if (cName) {
+        let cImg = null;
+        if (cFile) {
+          if (cldCloud && cldPreset) {
+            try {
+              const cldForm = new FormData();
+              cldForm.append('file', cFile);
+              cldForm.append('upload_preset', cldPreset);
+              const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cldCloud}/image/upload`, {
+                method: 'POST',
+                body: cldForm
+              });
+              if (cldRes.ok) {
+                const cldData = await cldRes.json();
+                if (cldData.secure_url) cImg = cldData.secure_url;
+              }
+            } catch (err) {}
+          }
+          if (!cImg) {
+            try { cImg = await compressImageFile(cFile, 800, 800, 0.75); } catch (err) {}
+          }
+        }
+        if (cImg) {
+          uploadedImages.push(cImg);
+        }
+        colors.push({
+          name: cName,
+          hex: cHex,
+          image: cImg
+        });
+      }
+    }
+
+    if (colors.length === 0 && colorNames.length > 0) {
+      colorNames.forEach((name, idx) => {
+        colors.push({
+          name: name,
+          hex: '#E5C158',
+          image: uploadedImages[idx] || uploadedImages[0] || null
+        });
+      });
+    }
+
     const finalImage = uploadedImages[0] || 'assets/images/chrome_hearts_black_tee.jpg';
     if (uploadedImages.length === 0) {
       uploadedImages = [finalImage];
     }
 
-    // Colors mapping
-    const colors = colorNames.map((name, idx) => ({
-      name: name,
-      image: uploadedImages[idx] || uploadedImages[0] || finalImage
-    }));
+    colors.forEach(c => {
+      if (!c.image) c.image = finalImage;
+    });
 
     const formData = new FormData();
     formData.append('title', title);

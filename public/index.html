@@ -420,7 +420,16 @@
                   <input type="text" id="prodImageUrl" placeholder="https://example.com/item1.jpg, https://example.com/item2.jpg">
                 </div>
                 <div class="form-group">
-                  <label for="prodColors">Color Variants (comma separated):</label>
+                  <label><i class="fa-solid fa-palette"></i> Color Variants &amp; Photo Mapping:</label>
+                  <div id="colorVariantsList" class="color-variants-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
+                    <!-- Dynamic color rows injected via app.js -->
+                  </div>
+                  <button type="button" id="addColorVariantBtn" class="btn btn-outline btn-sm" style="border-color: var(--border-gold); color: var(--gold-primary);">
+                    <i class="fa-solid fa-plus"></i> Add Color &amp; Photo Match
+                  </button>
+                </div>
+                <div class="form-group">
+                  <label for="prodColors">OR Quick Color Names (comma separated):</label>
                   <input type="text" id="prodColors" placeholder="e.g. Midnight Black, Royal Blue, Mocha Brown, Red">
                 </div>
                 <div class="form-group">
