@@ -49,6 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const qvMinusBtn = document.getElementById('qvMinusBtn');
   const qvPlusBtn = document.getElementById('qvPlusBtn');
   const qvAddToCartBtn = document.getElementById('qvAddToCartBtn');
+  const qvGalleryThumbs = document.getElementById('qvGalleryThumbs');
+  const qvColorsGroup = document.getElementById('qvColorsGroup');
+  const qvColorsContainer = document.getElementById('qvColorsContainer');
+  let selectedQvColor = '';
 
   // M-Pesa Modal DOM
   const mpesaModal = document.getElementById('mpesaModal');
@@ -86,11 +90,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEFAULT_PRODUCTS = [
     {
       "id": "prod_1",
-      "title": "Chrome Hearts Cross Rhinestone Black Tee",
+      "title": "Chrome Hearts Cross Rhinestone Luxury Tee",
       "category": "T-Shirts",
       "price": 2500,
       "image": "assets/images/chrome_hearts_black_tee.jpg",
-      "description": "Oversized luxury heavyweight cotton black t-shirt featuring Chrome Hearts front chest logo and iconic cross crystal print back.",
+      "images": [
+        "assets/images/chrome_hearts_black_tee.jpg",
+        "assets/images/chrome_hearts_blue_tee.jpg"
+      ],
+      "colors": [
+        { "name": "Midnight Black", "hex": "#111111", "image": "assets/images/chrome_hearts_black_tee.jpg" },
+        { "name": "Royal Blue", "hex": "#1E3A8A", "image": "assets/images/chrome_hearts_blue_tee.jpg" }
+      ],
+      "description": "Oversized luxury heavyweight cotton t-shirt featuring Chrome Hearts front chest logo and iconic cross crystal print back.",
       "sizes": ["S", "M", "L", "XL", "XXL"],
       "inStock": true,
       "stockQty": 15,
@@ -99,94 +111,49 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     {
       "id": "prod_2",
-      "title": "Stussy 8-Ball Vintage Brown Tee",
+      "title": "Stussy 8-Ball Vintage Graphic Tee",
       "category": "T-Shirts",
       "price": 2200,
       "image": "assets/images/stussy_brown_tee.jpg",
-      "description": "Classic streetwear rich chocolate brown tee with pink Stussy script logo and signature 8-ball graphic.",
+      "images": [
+        "assets/images/stussy_brown_tee.jpg",
+        "assets/images/stussy_black_tee.jpg",
+        "assets/images/stussy_white_tee.jpg"
+      ],
+      "colors": [
+        { "name": "Vintage Brown", "hex": "#4A2E1B", "image": "assets/images/stussy_brown_tee.jpg" },
+        { "name": "Washed Black", "hex": "#1A1A1A", "image": "assets/images/stussy_black_tee.jpg" },
+        { "name": "Fresh White", "hex": "#FFFFFF", "image": "assets/images/stussy_white_tee.jpg" }
+      ],
+      "description": "Classic streetwear tee with pink Stussy script logo and signature 8-ball graphic print.",
       "sizes": ["S", "M", "L", "XL"],
       "inStock": true,
-      "stockQty": 12,
+      "stockQty": 25,
       "featured": true,
       "tags": ["Vintage", "Popular"]
     },
     {
-      "id": "prod_3",
-      "title": "Stussy 8-Ball Graphic Black Tee",
-      "category": "T-Shirts",
-      "price": 2200,
-      "image": "assets/images/stussy_black_tee.jpg",
-      "description": "Premium washed black oversized graphic t-shirt featuring pink Stussy script and 8-ball chest print.",
-      "sizes": ["S", "M", "L", "XL", "XXL"],
-      "inStock": true,
-      "stockQty": 20,
-      "featured": true,
-      "tags": ["Hot", "Essential"]
-    },
-    {
-      "id": "prod_4",
-      "title": "Stussy 8-Ball Fresh White Tee",
-      "category": "T-Shirts",
-      "price": 2200,
-      "image": "assets/images/stussy_white_tee.jpg",
-      "description": "Clean bright white streetwear crewneck t-shirt with pink Stussy logo and 8-ball detail.",
-      "sizes": ["S", "M", "L", "XL"],
-      "inStock": true,
-      "stockQty": 18,
-      "featured": true,
-      "tags": ["Summer", "Clean"]
-    },
-    {
-      "id": "prod_5",
-      "title": "Chrome Hearts Cross Rhinestone Royal Blue Tee",
-      "category": "T-Shirts",
-      "price": 2500,
-      "image": "assets/images/chrome_hearts_blue_tee.jpg",
-      "description": "Vibrant royal blue luxury graphic tee with rhinestone embellished Chrome Hearts crosses back artwork.",
-      "sizes": ["S", "M", "L", "XL"],
-      "inStock": true,
-      "stockQty": 10,
-      "featured": true,
-      "tags": ["Exclusive", "Blue"]
-    },
-    {
       "id": "prod_6",
-      "title": "Los Angeles L.A. Red Track Set & Cap",
+      "title": "Los Angeles L.A. 3-Piece Track Set & Cap",
       "category": "Sets & Suits",
       "price": 4200,
       "image": "assets/images/la_shortset_red.jpg",
-      "description": "3-Piece Premium Streetwear Set: Bold red oversized embroidered Los Angeles t-shirt, matching drawstring shorts, and crisp white LA baseball cap.",
+      "images": [
+        "assets/images/la_shortset_red.jpg",
+        "assets/images/la_shortset_black.jpg",
+        "assets/images/la_shortset_brown.jpg"
+      ],
+      "colors": [
+        { "name": "Bold Red", "hex": "#DC2626", "image": "assets/images/la_shortset_red.jpg" },
+        { "name": "Midnight Black", "hex": "#111827", "image": "assets/images/la_shortset_black.jpg" },
+        { "name": "Mocha Brown", "hex": "#6B4636", "image": "assets/images/la_shortset_brown.jpg" }
+      ],
+      "description": "3-Piece Premium Streetwear Set: Oversized embroidered Los Angeles t-shirt, matching drawstring shorts, and crisp white LA baseball cap.",
       "sizes": ["M", "L", "XL", "XXL"],
       "inStock": true,
-      "stockQty": 8,
+      "stockQty": 20,
       "featured": true,
       "tags": ["3-Piece Set", "Trending"]
-    },
-    {
-      "id": "prod_7",
-      "title": "Los Angeles L.A. Midnight Black Track Set & Cap",
-      "category": "Sets & Suits",
-      "price": 4200,
-      "image": "assets/images/la_shortset_black.jpg",
-      "description": "3-Piece Premium Streetwear Set: Midnight black embroidered Los Angeles t-shirt, matching black drawstring shorts, and white LA cap.",
-      "sizes": ["M", "L", "XL", "XXL"],
-      "inStock": true,
-      "stockQty": 14,
-      "featured": true,
-      "tags": ["3-Piece Set", "Bestseller"]
-    },
-    {
-      "id": "prod_8",
-      "title": "Los Angeles L.A. Mocha Brown Track Set & Cap",
-      "category": "Sets & Suits",
-      "price": 4200,
-      "image": "assets/images/la_shortset_brown.jpg",
-      "description": "3-Piece Premium Streetwear Set: Earthy mocha brown embroidered Los Angeles t-shirt, matching shorts, and white LA cap.",
-      "sizes": ["M", "L", "XL", "XXL"],
-      "inStock": true,
-      "stockQty": 9,
-      "featured": true,
-      "tags": ["3-Piece Set", "Mocha"]
     },
     {
       "id": "prod_9",
@@ -194,6 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
       "category": "Shoes & Kicks",
       "price": 6800,
       "image": "assets/images/jordan_sneaker.jpg",
+      "images": ["assets/images/jordan_sneaker.jpg"],
+      "colors": [{ "name": "Bred Red/Black", "hex": "#991B1B", "image": "assets/images/jordan_sneaker.jpg" }],
       "description": "Iconic high-top premium leather sneakers in classic black and varsity red colorway with signature swoosh and cushioned sole.",
       "sizes": ["EU 40", "EU 41", "EU 42", "EU 43", "EU 44", "EU 45"],
       "inStock": true,
@@ -207,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
       "category": "Shoes & Kicks",
       "price": 5900,
       "image": "assets/images/dunk_sneaker.jpg",
+      "images": ["assets/images/dunk_sneaker.jpg"],
+      "colors": [{ "name": "Forest Green", "hex": "#15803D", "image": "assets/images/dunk_sneaker.jpg" }],
       "description": "Stylish low-top leather sneakers with white panels and forest green overlays. Ultimate everyday streetwear sneaker.",
       "sizes": ["EU 40", "EU 41", "EU 42", "EU 43", "EU 44"],
       "inStock": true,
@@ -220,6 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
       "category": "Sweaters & Hoodies",
       "price": 3800,
       "image": "assets/images/cream_sweater.jpg",
+      "images": ["assets/images/cream_sweater.jpg"],
+      "colors": [{ "name": "Cream White", "hex": "#FEF3C7", "image": "assets/images/cream_sweater.jpg" }],
       "description": "Cozy luxury oversized cable knit sweater crafted from soft heavy wool blend in a timeless cream white tone.",
       "sizes": ["S", "M", "L", "XL"],
       "inStock": true,
@@ -378,6 +351,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const sizesHtml = p.sizes ? p.sizes.map(s => `<span class="size-pill">${s}</span>`).join('') : '';
         const imgSrc = getImageUrl(p.image);
 
+        const colorsHtml = p.colors && p.colors.length > 0 ? `
+          <div class="card-colors-row">
+            ${p.colors.map((c, i) => `
+              <span class="card-color-chip ${i === 0 ? 'active' : ''}" data-id="${p.id}" data-img="${getImageUrl(c.image || p.image)}" data-color="${c.name}">
+                <span class="color-swatch-dot" style="background-color: ${c.hex || '#E5C158'};"></span> ${c.name}
+              </span>
+            `).join('')}
+          </div>
+        ` : '';
+
+        const defaultColor = p.colors && p.colors.length > 0 ? p.colors[0].name : '';
+
         return `
           <div class="product-card">
             <div class="card-media">
@@ -396,11 +381,12 @@ document.addEventListener('DOMContentLoaded', () => {
                   ${p.inStock ? 'In Stock' : 'Sold Out'}
                 </span>
               </div>
+              ${colorsHtml}
               <div class="card-sizes">
                 ${sizesHtml}
               </div>
               <div class="card-footer">
-                <button class="btn btn-gold btn-full add-to-cart-direct" data-id="${p.id}" ${!p.inStock ? 'disabled' : ''}>
+                <button class="btn btn-gold btn-full add-to-cart-direct" data-id="${p.id}" data-selected-color="${defaultColor}" ${!p.inStock ? 'disabled' : ''}>
                   <i class="fa-solid fa-bag-shopping"></i> ${p.inStock ? 'Add to Cart' : 'Out of Stock'}
                 </button>
               </div>
@@ -418,13 +404,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     currentQvProduct = product;
     selectedQvSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : 'Free Size';
+    selectedQvColor = product.colors && product.colors.length > 0 ? product.colors[0].name : '';
 
-    qvImage.src = getImageUrl(product.image);
+    const initialImg = getImageUrl(product.image);
+    qvImage.src = initialImg;
     qvCategory.textContent = product.category;
     qvTitle.textContent = product.title;
     qvPrice.textContent = `KES ${product.price.toLocaleString()}`;
     qvDescription.textContent = product.description || 'No detailed description available.';
     qvQtyInput.value = 1;
+
+    // Build list of all available images (main image, images array, color variant images)
+    const allImages = [];
+    if (product.image) allImages.push(product.image);
+    if (product.images && product.images.length > 0) {
+      product.images.forEach(img => {
+        if (!allImages.includes(img)) allImages.push(img);
+      });
+    }
+    if (product.colors && product.colors.length > 0) {
+      product.colors.forEach(c => {
+        if (c.image && !allImages.includes(c.image)) allImages.push(c.image);
+      });
+    }
+
+    // Render Thumbnail Gallery
+    if (allImages.length > 1) {
+      qvGalleryThumbs.style.display = 'flex';
+      qvGalleryThumbs.innerHTML = allImages.map((img, idx) => `
+        <button class="qv-thumb-btn ${idx === 0 ? 'active' : ''}" data-img="${getImageUrl(img)}">
+          <img src="${getImageUrl(img)}" alt="thumb">
+        </button>
+      `).join('');
+    } else {
+      qvGalleryThumbs.style.display = 'none';
+      qvGalleryThumbs.innerHTML = '';
+    }
+
+    // Render Color Options
+    if (product.colors && product.colors.length > 0) {
+      qvColorsGroup.style.display = 'block';
+      qvColorsContainer.innerHTML = product.colors.map((c, idx) => `
+        <button class="color-swatch-btn ${idx === 0 ? 'selected' : ''}" data-color="${c.name}" data-img="${getImageUrl(c.image || product.image)}">
+          <span class="color-swatch-dot" style="background-color: ${c.hex || '#E5C158'};"></span>
+          ${c.name}
+        </button>
+      `).join('');
+    } else {
+      qvColorsGroup.style.display = 'none';
+      qvColorsContainer.innerHTML = '';
+    }
 
     // Render sizes
     if (product.sizes && product.sizes.length > 0) {
@@ -439,12 +468,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- SHOPPING CART MANAGEMENT ---
-  function addToCart(productId, size = null, qty = 1) {
+  function addToCart(productId, size = null, qty = 1, color = null) {
     const product = products.find(p => p.id === productId);
     if (!product || !product.inStock) return;
 
     const chosenSize = size || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : 'Standard');
-    const existingIndex = cart.findIndex(item => item.id === productId && item.size === chosenSize);
+    const chosenColor = color || selectedQvColor || (product.colors && product.colors.length > 0 ? product.colors[0].name : null);
+
+    let chosenImage = product.image;
+    if (chosenColor && product.colors) {
+      const matchedColor = product.colors.find(c => c.name === chosenColor);
+      if (matchedColor && matchedColor.image) {
+        chosenImage = matchedColor.image;
+      }
+    }
+
+    const existingIndex = cart.findIndex(item => item.id === productId && item.size === chosenSize && item.color === chosenColor);
 
     if (existingIndex > -1) {
       cart[existingIndex].quantity += qty;
@@ -453,9 +492,10 @@ document.addEventListener('DOMContentLoaded', () => {
         id: product.id,
         title: product.title,
         price: product.price,
-        image: product.image,
+        image: chosenImage,
         category: product.category,
         size: chosenSize,
+        color: chosenColor,
         quantity: qty
       });
     }
@@ -509,7 +549,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <img src="${getImageUrl(item.image)}" alt="${item.title}" class="cart-item-thumb" onerror="this.onerror=null; this.src='assets/images/chrome_hearts_black_tee.jpg';">
           <div class="cart-item-info">
             <h4 class="cart-item-title">${item.title}</h4>
-            <div class="cart-item-meta">Size: <strong>${item.size}</strong></div>
+            <div class="cart-item-meta">
+              ${item.color ? `Color: <strong>${item.color}</strong> &nbsp;|&nbsp; ` : ''}Size: <strong>${item.size}</strong>
+            </div>
             <div class="cart-item-price">KES ${(item.price * item.quantity).toLocaleString()}</div>
           </div>
           <div class="cart-item-actions" style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between;">
@@ -752,55 +794,79 @@ document.addEventListener('DOMContentLoaded', () => {
     const description = document.getElementById('prodDescription').value.trim();
     const sizesRaw = document.getElementById('prodSizes').value.trim();
     const stockQty = parseInt(document.getElementById('prodStockQty').value) || 10;
-    const imageUrl = document.getElementById('prodImageUrl').value.trim();
+    const imageUrlInput = document.getElementById('prodImageUrl').value.trim();
+    const colorInputRaw = document.getElementById('prodColors') ? document.getElementById('prodColors').value.trim() : '';
     const tagsRaw = document.getElementById('prodTags').value.trim();
     const featured = document.getElementById('prodFeatured').checked;
 
     const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : ['S', 'M', 'L', 'XL'];
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : ['New Drop'];
+    const colorNames = colorInputRaw ? colorInputRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
 
     const fileInput = document.getElementById('prodImageFile');
 
-    let localDataUrl = null;
-    let cloudinaryUrl = null;
+    let uploadedImages = [];
 
-    // Check Cloudinary Credentials (Defaults to pre-configured yvbo2mtt & clothstore_preset)
+    // Check Cloudinary Credentials
     const cldCloud = localStorage.getItem('vibe_cloudinary_cloud_name') || 'yvbo2mtt';
     const cldPreset = localStorage.getItem('vibe_cloudinary_preset') || 'clothstore_preset';
 
     if (fileInput.files.length > 0) {
-      // 1. Try Cloudinary direct upload if configured
-      if (cldCloud && cldPreset) {
-        try {
-          const cldForm = new FormData();
-          cldForm.append('file', fileInput.files[0]);
-          cldForm.append('upload_preset', cldPreset);
+      for (let i = 0; i < fileInput.files.length; i++) {
+        const file = fileInput.files[i];
+        let cldUrl = null;
 
-          const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cldCloud}/image/upload`, {
-            method: 'POST',
-            body: cldForm
-          });
+        // 1. Try Cloudinary direct upload
+        if (cldCloud && cldPreset) {
+          try {
+            const cldForm = new FormData();
+            cldForm.append('file', file);
+            cldForm.append('upload_preset', cldPreset);
 
-          if (cldRes.ok) {
-            const cldData = await cldRes.json();
-            if (cldData.secure_url) {
-              cloudinaryUrl = cldData.secure_url;
+            const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cldCloud}/image/upload`, {
+              method: 'POST',
+              body: cldForm
+            });
+
+            if (cldRes.ok) {
+              const cldData = await cldRes.json();
+              if (cldData.secure_url) {
+                cldUrl = cldData.secure_url;
+              }
             }
+          } catch (cldErr) {
+            console.warn('Cloudinary upload error for file', i, cldErr);
           }
-        } catch (cldErr) {
-          console.warn('Cloudinary upload error:', cldErr);
         }
-      }
 
-      // 2. Local compressed canvas backup
-      try {
-        localDataUrl = await compressImageFile(fileInput.files[0], 800, 800, 0.75);
-      } catch (err) {
-        console.warn('Image compression error:', err);
+        // 2. Local compressed canvas backup
+        if (!cldUrl) {
+          try {
+            cldUrl = await compressImageFile(file, 800, 800, 0.75);
+          } catch (err) {}
+        }
+
+        if (cldUrl) {
+          uploadedImages.push(cldUrl);
+        }
       }
     }
 
-    const finalImage = cloudinaryUrl || localDataUrl || imageUrl || 'assets/images/chrome_hearts_black_tee.jpg';
+    if (imageUrlInput) {
+      const extraUrls = imageUrlInput.split(',').map(u => u.trim()).filter(Boolean);
+      uploadedImages = [...uploadedImages, ...extraUrls];
+    }
+
+    const finalImage = uploadedImages[0] || 'assets/images/chrome_hearts_black_tee.jpg';
+    if (uploadedImages.length === 0) {
+      uploadedImages = [finalImage];
+    }
+
+    // Colors mapping
+    const colors = colorNames.map((name, idx) => ({
+      name: name,
+      image: uploadedImages[idx] || uploadedImages[0] || finalImage
+    }));
 
     const formData = new FormData();
     formData.append('title', title);
@@ -810,12 +876,10 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('sizes', JSON.stringify(sizes));
     formData.append('stockQty', stockQty);
     formData.append('imageUrl', finalImage);
+    formData.append('images', JSON.stringify(uploadedImages));
+    formData.append('colors', JSON.stringify(colors));
     formData.append('tags', JSON.stringify(tags));
     formData.append('featured', featured);
-
-    if (fileInput.files.length > 0 && !cloudinaryUrl) {
-      formData.append('imageFile', fileInput.files[0]);
-    }
 
     let createdProduct = null;
 
@@ -842,6 +906,8 @@ document.addEventListener('DOMContentLoaded', () => {
         category: category || 'T-Shirts',
         price: price,
         image: finalImage,
+        images: uploadedImages,
+        colors: colors,
         description: description,
         sizes: sizes,
         inStock: true,
@@ -852,6 +918,8 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     } else {
       createdProduct.image = finalImage;
+      createdProduct.images = uploadedImages;
+      createdProduct.colors = colors;
     }
 
     // Save to localStorage safely
@@ -873,7 +941,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    alert('Product added successfully!' + (cloudinaryUrl ? ' (Saved to Cloudinary Cloud)' : ''));
+    alert('Product added successfully! (' + uploadedImages.length + ' photo' + (uploadedImages.length > 1 ? 's' : '') + ' uploaded)');
     addProductForm.reset();
     await fetchProducts();
     renderInventoryTable();
@@ -1015,8 +1083,26 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCatalog();
     });
 
-    // Grid Actions (Quick View & Add to Cart)
+    // Grid Actions (Quick View, Add to Cart, & Color Swatch Taps)
     productGrid.addEventListener('click', (e) => {
+      const colorChip = e.target.closest('.card-color-chip');
+      if (colorChip) {
+        const card = colorChip.closest('.product-card');
+        if (card) {
+          card.querySelectorAll('.card-color-chip').forEach(chip => chip.classList.remove('active'));
+          colorChip.classList.add('active');
+          const cardImg = card.querySelector('.card-media img');
+          if (cardImg && colorChip.dataset.img) {
+            cardImg.src = colorChip.dataset.img;
+          }
+          const addBtn = card.querySelector('.add-to-cart-direct');
+          if (addBtn) {
+            addBtn.dataset.selectedColor = colorChip.dataset.color;
+          }
+        }
+        return;
+      }
+
       const qvBtn = e.target.closest('.quick-view-btn');
       if (qvBtn) {
         openQuickView(qvBtn.dataset.id);
@@ -1025,9 +1111,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const addBtn = e.target.closest('.add-to-cart-direct');
       if (addBtn) {
-        addToCart(addBtn.dataset.id);
+        const color = addBtn.dataset.selectedColor || null;
+        addToCart(addBtn.dataset.id, null, 1, color);
       }
     });
+
+    // Quick View Gallery & Color Swatch Listeners
+    if (qvGalleryThumbs) {
+      qvGalleryThumbs.addEventListener('click', (e) => {
+        const thumb = e.target.closest('.qv-thumb-btn');
+        if (!thumb) return;
+        document.querySelectorAll('.qv-thumb-btn').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+        if (thumb.dataset.img) {
+          qvImage.src = thumb.dataset.img;
+        }
+      });
+    }
+
+    if (qvColorsContainer) {
+      qvColorsContainer.addEventListener('click', (e) => {
+        const swatch = e.target.closest('.color-swatch-btn');
+        if (!swatch) return;
+        document.querySelectorAll('.color-swatch-btn').forEach(s => s.classList.remove('selected'));
+        swatch.classList.add('selected');
+        selectedQvColor = swatch.dataset.color;
+        if (swatch.dataset.img) {
+          qvImage.src = swatch.dataset.img;
+          document.querySelectorAll('.qv-thumb-btn').forEach(t => {
+            t.classList.toggle('active', t.dataset.img === swatch.dataset.img);
+          });
+        }
+      });
+    }
 
     // Quick View Modal
     closeQuickView.addEventListener('click', () => quickViewModal.classList.remove('active'));
@@ -1053,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     qvAddToCartBtn.addEventListener('click', () => {
       if (currentQvProduct) {
         const qty = parseInt(qvQtyInput.value) || 1;
-        addToCart(currentQvProduct.id, selectedQvSize, qty);
+        addToCart(currentQvProduct.id, selectedQvSize, qty, selectedQvColor);
         quickViewModal.classList.remove('active');
       }
     });

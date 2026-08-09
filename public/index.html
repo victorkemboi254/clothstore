@@ -139,12 +139,20 @@
       <div class="quick-view-content">
         <div class="quick-view-media">
           <img id="qvImage" src="" alt="Product Detail">
+          <div class="qv-gallery-thumbs" id="qvGalleryThumbs"></div>
         </div>
         <div class="quick-view-details">
           <span class="qv-category" id="qvCategory">Category</span>
           <h2 class="qv-title" id="qvTitle">Product Title</h2>
           <div class="qv-price" id="qvPrice">KES 0</div>
           <p class="qv-description" id="qvDescription">Description here...</p>
+
+          <div class="qv-option-group" id="qvColorsGroup" style="display: none;">
+            <label>Select Color / Variant:</label>
+            <div class="color-selector" id="qvColorsContainer">
+              <!-- Color swatches injected dynamically -->
+            </div>
+          </div>
 
           <div class="qv-option-group">
             <label>Select Size:</label>
@@ -402,14 +410,18 @@
                 <div class="form-group">
                   <label>Upload Image File:</label>
                   <div class="file-upload-box">
-                    <input type="file" id="prodImageFile" accept="image/*">
+                    <input type="file" id="prodImageFile" multiple accept="image/*">
                     <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-                    <p>Click or drag image file here</p>
+                    <p>Click or drag multiple photos here</p>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="prodImageUrl">OR Image URL:</label>
-                  <input type="text" id="prodImageUrl" placeholder="https://example.com/item.jpg">
+                  <label for="prodImageUrl">OR Image URLs (comma separated):</label>
+                  <input type="text" id="prodImageUrl" placeholder="https://example.com/item1.jpg, https://example.com/item2.jpg">
+                </div>
+                <div class="form-group">
+                  <label for="prodColors">Color Variants (comma separated):</label>
+                  <input type="text" id="prodColors" placeholder="e.g. Midnight Black, Royal Blue, Mocha Brown, Red">
                 </div>
                 <div class="form-group">
                   <label for="prodTags">Tags (comma separated):</label>

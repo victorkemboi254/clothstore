@@ -92,16 +92,38 @@ app.get('/api/products', (req, res) => {
   res.json(products);
 });
 
-app.post('/api/products', upload.single('imageFile'), (req, res) => {
+app.post('/api/products', upload.any(), (req, res) => {
   const products = readJson(PRODUCTS_FILE, []);
   
   let imageUrl = req.body.imageUrl || '';
+  let images = [];
+
+  if (req.body.images) {
+    if (typeof req.body.images === 'string') {
+      try {
+        images = JSON.parse(req.body.images);
+      } catch (e) {
+        images = req.body.images.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    } else if (Array.isArray(req.body.images)) {
+      images = req.body.images;
+    }
+  }
+
+  if (req.files && req.files.length > 0) {
+    const uploadedPaths = req.files.map(f => `/uploads/${f.filename}`);
+    images = [...images, ...uploadedPaths];
+    if (!imageUrl) imageUrl = uploadedPaths[0];
+  }
+
   if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:image/'))) {
-    // Preserve Cloudinary URL or Data URL
-  } else if (req.file) {
-    imageUrl = `/uploads/${req.file.filename}`;
+    // Preserve Cloudinary or Data URL
   } else if (!imageUrl) {
-    imageUrl = 'assets/images/chrome_hearts_black_tee.jpg';
+    imageUrl = images.length > 0 ? images[0] : 'assets/images/chrome_hearts_black_tee.jpg';
+  }
+
+  if (images.length === 0 && imageUrl) {
+    images = [imageUrl];
   }
 
   let sizes = req.body.sizes;
@@ -122,12 +144,23 @@ app.post('/api/products', upload.single('imageFile'), (req, res) => {
     }
   }
 
+  let colors = req.body.colors;
+  if (typeof colors === 'string') {
+    try {
+      colors = JSON.parse(colors);
+    } catch (e) {
+      colors = colors.split(',').map(c => ({ name: c.trim(), image: imageUrl })).filter(Boolean);
+    }
+  }
+
   const newProduct = {
     id: 'prod_' + Date.now(),
     title: req.body.title || 'Untitled Item',
     category: req.body.category || 'General',
     price: parseFloat(req.body.price) || 0,
     image: imageUrl,
+    images: images,
+    colors: colors || [],
     description: req.body.description || '',
     sizes: sizes || ['S', 'M', 'L', 'XL'],
     inStock: req.body.inStock !== 'false' && req.body.inStock !== false,
@@ -143,7 +176,7 @@ app.post('/api/products', upload.single('imageFile'), (req, res) => {
   res.status(201).json({ success: true, product: newProduct });
 });
 
-app.put('/api/products/:id', upload.single('imageFile'), (req, res) => {
+app.put('/api/products/:id', upload.any(), (req, res) => {
   const products = readJson(PRODUCTS_FILE, []);
   const index = products.findIndex(p => p.id === req.params.id);
   
@@ -153,10 +186,28 @@ app.put('/api/products/:id', upload.single('imageFile'), (req, res) => {
 
   const existing = products[index];
   let imageUrl = req.body.imageUrl || existing.image;
-  if (req.body.imageUrl && (req.body.imageUrl.startsWith('http://') || req.body.imageUrl.startsWith('https://') || req.body.imageUrl.startsWith('data:image/'))) {
-    imageUrl = req.body.imageUrl;
-  } else if (req.file) {
-    imageUrl = `/uploads/${req.file.filename}`;
+
+  let images = existing.images || [imageUrl];
+  if (req.body.images) {
+    if (typeof req.body.images === 'string') {
+      try { images = JSON.parse(req.body.images); } catch (e) { images = req.body.images.split(',').map(s => s.trim()).filter(Boolean); }
+    } else if (Array.isArray(req.body.images)) {
+      images = req.body.images;
+    }
+  }
+
+  if (req.files && req.files.length > 0) {
+    const uploadedPaths = req.files.map(f => `/uploads/${f.filename}`);
+    images = [...images, ...uploadedPaths];
+  }
+
+  let colors = existing.colors || [];
+  if (req.body.colors) {
+    if (typeof req.body.colors === 'string') {
+      try { colors = JSON.parse(req.body.colors); } catch (e) { colors = req.body.colors.split(',').map(c => ({ name: c.trim(), image: imageUrl })); }
+    } else if (Array.isArray(req.body.colors)) {
+      colors = req.body.colors;
+    }
   }
 
   let sizes = req.body.sizes ? (typeof req.body.sizes === 'string' ? JSON.parse(req.body.sizes) : req.body.sizes) : existing.sizes;
@@ -168,6 +219,8 @@ app.put('/api/products/:id', upload.single('imageFile'), (req, res) => {
     category: req.body.category || existing.category,
     price: req.body.price ? parseFloat(req.body.price) : existing.price,
     image: imageUrl,
+    images: images,
+    colors: colors,
     description: req.body.description !== undefined ? req.body.description : existing.description,
     sizes: sizes,
     inStock: req.body.inStock !== undefined ? (req.body.inStock === 'true' || req.body.inStock === true) : existing.inStock,
@@ -178,7 +231,6 @@ app.put('/api/products/:id', upload.single('imageFile'), (req, res) => {
 
   products[index] = updatedProduct;
   writeJson(PRODUCTS_FILE, products);
-
   res.json({ success: true, product: updatedProduct });
 });
 

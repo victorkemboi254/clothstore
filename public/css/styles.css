@@ -746,13 +746,118 @@ input:checked + .slider:before {
   background: #000;
   border-radius: var(--radius-md);
   overflow: hidden;
-  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.quick-view-media img {
+.quick-view-media img#qvImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+/* MULTI-IMAGE GALLERY THUMBS & COLOR SWATCHES */
+.qv-gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.qv-thumb-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-color);
+  background: #000;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+}
+
+.qv-thumb-btn img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.qv-thumb-btn.active, .qv-thumb-btn:hover {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 2px var(--gold-shadow);
+}
+
+.color-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.color-swatch-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-sub);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.color-swatch-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.color-swatch-btn.selected {
+  border-color: var(--gold-primary);
+  background: rgba(229, 193, 88, 0.15);
+  color: var(--gold-primary);
+  font-weight: 700;
+}
+
+.color-swatch-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: inline-block;
+}
+
+.card-colors-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.card-color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.card-color-chip:hover, .card-color-chip.active {
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+  background: rgba(229, 193, 88, 0.1);
 }
 
 .qv-category {

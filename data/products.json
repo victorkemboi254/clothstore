@@ -1,11 +1,19 @@
 [
   {
     "id": "prod_1",
-    "title": "Chrome Hearts Cross Rhinestone Black Tee",
+    "title": "Chrome Hearts Cross Rhinestone Luxury Tee",
     "category": "T-Shirts",
     "price": 2500,
     "image": "assets/images/chrome_hearts_black_tee.jpg",
-    "description": "Oversized luxury heavyweight cotton black t-shirt featuring Chrome Hearts front chest logo and iconic cross crystal print back.",
+    "images": [
+      "assets/images/chrome_hearts_black_tee.jpg",
+      "assets/images/chrome_hearts_blue_tee.jpg"
+    ],
+    "colors": [
+      { "name": "Midnight Black", "hex": "#111111", "image": "assets/images/chrome_hearts_black_tee.jpg" },
+      { "name": "Royal Blue", "hex": "#1E3A8A", "image": "assets/images/chrome_hearts_blue_tee.jpg" }
+    ],
+    "description": "Oversized luxury heavyweight cotton t-shirt featuring Chrome Hearts front chest logo and iconic cross crystal print back.",
     "sizes": ["S", "M", "L", "XL", "XXL"],
     "inStock": true,
     "stockQty": 15,
@@ -14,94 +22,49 @@
   },
   {
     "id": "prod_2",
-    "title": "Stussy 8-Ball Vintage Brown Tee",
+    "title": "Stussy 8-Ball Vintage Graphic Tee",
     "category": "T-Shirts",
     "price": 2200,
     "image": "assets/images/stussy_brown_tee.jpg",
-    "description": "Classic streetwear rich chocolate brown tee with pink Stussy script logo and signature 8-ball graphic.",
+    "images": [
+      "assets/images/stussy_brown_tee.jpg",
+      "assets/images/stussy_black_tee.jpg",
+      "assets/images/stussy_white_tee.jpg"
+    ],
+    "colors": [
+      { "name": "Vintage Brown", "hex": "#4A2E1B", "image": "assets/images/stussy_brown_tee.jpg" },
+      { "name": "Washed Black", "hex": "#1A1A1A", "image": "assets/images/stussy_black_tee.jpg" },
+      { "name": "Fresh White", "hex": "#FFFFFF", "image": "assets/images/stussy_white_tee.jpg" }
+    ],
+    "description": "Classic streetwear tee with pink Stussy script logo and signature 8-ball graphic print.",
     "sizes": ["S", "M", "L", "XL"],
     "inStock": true,
-    "stockQty": 12,
+    "stockQty": 25,
     "featured": true,
     "tags": ["Vintage", "Popular"]
   },
   {
-    "id": "prod_3",
-    "title": "Stussy 8-Ball Graphic Black Tee",
-    "category": "T-Shirts",
-    "price": 2200,
-    "image": "assets/images/stussy_black_tee.jpg",
-    "description": "Premium washed black oversized graphic t-shirt featuring pink Stussy script and 8-ball chest print.",
-    "sizes": ["S", "M", "L", "XL", "XXL"],
-    "inStock": true,
-    "stockQty": 20,
-    "featured": true,
-    "tags": ["Hot", "Essential"]
-  },
-  {
-    "id": "prod_4",
-    "title": "Stussy 8-Ball Fresh White Tee",
-    "category": "T-Shirts",
-    "price": 2200,
-    "image": "assets/images/stussy_white_tee.jpg",
-    "description": "Clean bright white streetwear crewneck t-shirt with pink Stussy logo and 8-ball detail.",
-    "sizes": ["S", "M", "L", "XL"],
-    "inStock": true,
-    "stockQty": 18,
-    "featured": true,
-    "tags": ["Summer", "Clean"]
-  },
-  {
-    "id": "prod_5",
-    "title": "Chrome Hearts Cross Rhinestone Royal Blue Tee",
-    "category": "T-Shirts",
-    "price": 2500,
-    "image": "assets/images/chrome_hearts_blue_tee.jpg",
-    "description": "Vibrant royal blue luxury graphic tee with rhinestone embellished Chrome Hearts crosses back artwork.",
-    "sizes": ["S", "M", "L", "XL"],
-    "inStock": true,
-    "stockQty": 10,
-    "featured": true,
-    "tags": ["Exclusive", "Blue"]
-  },
-  {
     "id": "prod_6",
-    "title": "Los Angeles L.A. Red Track Set & Cap",
+    "title": "Los Angeles L.A. 3-Piece Track Set & Cap",
     "category": "Sets & Suits",
     "price": 4200,
     "image": "assets/images/la_shortset_red.jpg",
-    "description": "3-Piece Premium Streetwear Set: Bold red oversized embroidered Los Angeles t-shirt, matching drawstring shorts, and crisp white LA baseball cap.",
+    "images": [
+      "assets/images/la_shortset_red.jpg",
+      "assets/images/la_shortset_black.jpg",
+      "assets/images/la_shortset_brown.jpg"
+    ],
+    "colors": [
+      { "name": "Bold Red", "hex": "#DC2626", "image": "assets/images/la_shortset_red.jpg" },
+      { "name": "Midnight Black", "hex": "#111827", "image": "assets/images/la_shortset_black.jpg" },
+      { "name": "Mocha Brown", "hex": "#6B4636", "image": "assets/images/la_shortset_brown.jpg" }
+    ],
+    "description": "3-Piece Premium Streetwear Set: Oversized embroidered Los Angeles t-shirt, matching drawstring shorts, and crisp white LA baseball cap.",
     "sizes": ["M", "L", "XL", "XXL"],
     "inStock": true,
-    "stockQty": 8,
+    "stockQty": 20,
     "featured": true,
     "tags": ["3-Piece Set", "Trending"]
-  },
-  {
-    "id": "prod_7",
-    "title": "Los Angeles L.A. Midnight Black Track Set & Cap",
-    "category": "Sets & Suits",
-    "price": 4200,
-    "image": "assets/images/la_shortset_black.jpg",
-    "description": "3-Piece Premium Streetwear Set: Midnight black embroidered Los Angeles t-shirt, matching black drawstring shorts, and white LA cap.",
-    "sizes": ["M", "L", "XL", "XXL"],
-    "inStock": true,
-    "stockQty": 14,
-    "featured": true,
-    "tags": ["3-Piece Set", "Bestseller"]
-  },
-  {
-    "id": "prod_8",
-    "title": "Los Angeles L.A. Mocha Brown Track Set & Cap",
-    "category": "Sets & Suits",
-    "price": 4200,
-    "image": "assets/images/la_shortset_brown.jpg",
-    "description": "3-Piece Premium Streetwear Set: Earthy mocha brown embroidered Los Angeles t-shirt, matching shorts, and white LA cap.",
-    "sizes": ["M", "L", "XL", "XXL"],
-    "inStock": true,
-    "stockQty": 9,
-    "featured": true,
-    "tags": ["3-Piece Set", "Mocha"]
   },
   {
     "id": "prod_9",
@@ -109,6 +72,12 @@
     "category": "Shoes & Kicks",
     "price": 6800,
     "image": "assets/images/jordan_sneaker.jpg",
+    "images": [
+      "assets/images/jordan_sneaker.jpg"
+    ],
+    "colors": [
+      { "name": "Bred Red/Black", "hex": "#991B1B", "image": "assets/images/jordan_sneaker.jpg" }
+    ],
     "description": "Iconic high-top premium leather sneakers in classic black and varsity red colorway with signature swoosh and cushioned sole.",
     "sizes": ["EU 40", "EU 41", "EU 42", "EU 43", "EU 44", "EU 45"],
     "inStock": true,
@@ -122,6 +91,12 @@
     "category": "Shoes & Kicks",
     "price": 5900,
     "image": "assets/images/dunk_sneaker.jpg",
+    "images": [
+      "assets/images/dunk_sneaker.jpg"
+    ],
+    "colors": [
+      { "name": "Forest Green", "hex": "#15803D", "image": "assets/images/dunk_sneaker.jpg" }
+    ],
     "description": "Stylish low-top leather sneakers with white panels and forest green overlays. Ultimate everyday streetwear sneaker.",
     "sizes": ["EU 40", "EU 41", "EU 42", "EU 43", "EU 44"],
     "inStock": true,
@@ -135,6 +110,12 @@
     "category": "Sweaters & Hoodies",
     "price": 3800,
     "image": "assets/images/cream_sweater.jpg",
+    "images": [
+      "assets/images/cream_sweater.jpg"
+    ],
+    "colors": [
+      { "name": "Cream White", "hex": "#FEF3C7", "image": "assets/images/cream_sweater.jpg" }
+    ],
     "description": "Cozy luxury oversized cable knit sweater crafted from soft heavy wool blend in a timeless cream white tone.",
     "sizes": ["S", "M", "L", "XL"],
     "inStock": true,
