@@ -96,10 +96,12 @@ app.post('/api/products', upload.single('imageFile'), (req, res) => {
   const products = readJson(PRODUCTS_FILE, []);
   
   let imageUrl = req.body.imageUrl || '';
-  if (req.file) {
+  if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:image/'))) {
+    // Preserve Cloudinary URL or Data URL
+  } else if (req.file) {
     imageUrl = `/uploads/${req.file.filename}`;
   } else if (!imageUrl) {
-    imageUrl = '/assets/images/chrome_hearts_black_tee.jpg';
+    imageUrl = 'assets/images/chrome_hearts_black_tee.jpg';
   }
 
   let sizes = req.body.sizes;
@@ -150,11 +152,11 @@ app.put('/api/products/:id', upload.single('imageFile'), (req, res) => {
   }
 
   const existing = products[index];
-  let imageUrl = existing.image;
-  if (req.file) {
-    imageUrl = `/uploads/${req.file.filename}`;
-  } else if (req.body.imageUrl) {
+  let imageUrl = req.body.imageUrl || existing.image;
+  if (req.body.imageUrl && (req.body.imageUrl.startsWith('http://') || req.body.imageUrl.startsWith('https://') || req.body.imageUrl.startsWith('data:image/'))) {
     imageUrl = req.body.imageUrl;
+  } else if (req.file) {
+    imageUrl = `/uploads/${req.file.filename}`;
   }
 
   let sizes = req.body.sizes ? (typeof req.body.sizes === 'string' ? JSON.parse(req.body.sizes) : req.body.sizes) : existing.sizes;

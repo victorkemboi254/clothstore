@@ -813,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('tags', JSON.stringify(tags));
     formData.append('featured', featured);
 
-    if (fileInput.files.length > 0) {
+    if (fileInput.files.length > 0 && !cloudinaryUrl) {
       formData.append('imageFile', fileInput.files[0]);
     }
 
