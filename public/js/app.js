@@ -290,6 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetchProducts();
     updateCartUI();
     setupEventListeners();
+
+    if (window.location.hash === '#admin' || localStorage.getItem('vibe_last_view') === 'admin') {
+      openAdminPortal();
+    }
   }
 
   async function fetchProducts() {
@@ -735,6 +739,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ADMIN PORTAL LOGIC ---
   function openAdminPortal() {
     adminModal.classList.add('active');
+    localStorage.setItem('vibe_last_view', 'admin');
+    if (window.location.hash !== '#admin') {
+      try { history.pushState(null, null, '#admin'); } catch (e) {}
+    }
     if (adminToken) {
       adminLoginView.style.display = 'none';
       adminDashboardView.style.display = 'block';
@@ -742,6 +750,14 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       adminLoginView.style.display = 'block';
       adminDashboardView.style.display = 'none';
+    }
+  }
+
+  function closeAdminPortalFunc() {
+    adminModal.classList.remove('active');
+    localStorage.setItem('vibe_last_view', 'store');
+    if (window.location.hash === '#admin') {
+      try { history.pushState(null, null, ' '); } catch (e) {}
     }
   }
 
@@ -760,6 +776,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.success) {
         adminToken = data.token;
         localStorage.setItem('vibe_admin_token', adminToken);
+        localStorage.setItem('vibe_last_view', 'admin');
         adminLoginView.style.display = 'none';
         adminDashboardView.style.display = 'block';
         loadAdminData();
@@ -774,8 +791,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleAdminLogout() {
     adminToken = null;
     localStorage.removeItem('vibe_admin_token');
+    localStorage.setItem('vibe_last_view', 'store');
     adminLoginView.style.display = 'block';
     adminDashboardView.style.display = 'none';
+    closeAdminPortalFunc();
   }
 
   function loadAdminData() {
@@ -815,220 +834,256 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
   }
 
+  let isSubmittingProduct = false;
+
   async function handleAddProduct(e) {
     e.preventDefault();
+    if (isSubmittingProduct) return;
 
-    const title = document.getElementById('prodTitle').value.trim();
-    const category = document.getElementById('prodCategory').value;
-    const price = parseFloat(document.getElementById('prodPrice').value) || 0;
-    const description = document.getElementById('prodDescription').value.trim();
-    const sizesRaw = document.getElementById('prodSizes').value.trim();
-    const stockQty = parseInt(document.getElementById('prodStockQty').value) || 10;
-    const imageUrlInput = document.getElementById('prodImageUrl').value.trim();
-    const colorInputRaw = document.getElementById('prodColors') ? document.getElementById('prodColors').value.trim() : '';
-    const tagsRaw = document.getElementById('prodTags').value.trim();
-    const featured = document.getElementById('prodFeatured').checked;
+    const submitBtn = addProductForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '<i class="fa-solid fa-floppy-disk"></i> Save &amp; Display in Store';
 
-    const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : ['S', 'M', 'L', 'XL'];
-    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : ['New Drop'];
-    const colorNames = colorInputRaw ? colorInputRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
+    isSubmittingProduct = true;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading to Cloudinary... Please wait';
+    }
 
-    const fileInput = document.getElementById('prodImageFile');
+    try {
+      const title = document.getElementById('prodTitle').value.trim();
+      const category = document.getElementById('prodCategory').value;
+      const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+      const description = document.getElementById('prodDescription').value.trim();
+      const sizesRaw = document.getElementById('prodSizes').value.trim();
+      const stockQty = parseInt(document.getElementById('prodStockQty').value) || 10;
+      const imageUrlInput = document.getElementById('prodImageUrl').value.trim();
+      const colorInputRaw = document.getElementById('prodColors') ? document.getElementById('prodColors').value.trim() : '';
+      const tagsRaw = document.getElementById('prodTags').value.trim();
+      const featured = document.getElementById('prodFeatured').checked;
 
-    let uploadedImages = [];
+      const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : ['S', 'M', 'L', 'XL'];
+      const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : ['New Drop'];
+      const colorNames = colorInputRaw ? colorInputRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
 
-    // Check Cloudinary Credentials
-    const cldCloud = localStorage.getItem('vibe_cloudinary_cloud_name') || 'yvbo2mtt';
-    const cldPreset = localStorage.getItem('vibe_cloudinary_preset') || 'clothstore_preset';
+      const fileInput = document.getElementById('prodImageFile');
 
-    if (fileInput.files.length > 0) {
-      for (let i = 0; i < fileInput.files.length; i++) {
-        const file = fileInput.files[i];
-        let cldUrl = null;
+      let uploadedImages = [];
 
-        // 1. Try Cloudinary direct upload
-        if (cldCloud && cldPreset) {
-          try {
-            const cldForm = new FormData();
-            cldForm.append('file', file);
-            cldForm.append('upload_preset', cldPreset);
+      // Check Cloudinary Credentials
+      const cldCloud = localStorage.getItem('vibe_cloudinary_cloud_name') || 'yvbo2mtt';
+      const cldPreset = localStorage.getItem('vibe_cloudinary_preset') || 'clothstore_preset';
 
-            const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cldCloud}/image/upload`, {
-              method: 'POST',
-              body: cldForm
-            });
-
-            if (cldRes.ok) {
-              const cldData = await cldRes.json();
-              if (cldData.secure_url) {
-                cldUrl = cldData.secure_url;
-              }
-            }
-          } catch (cldErr) {
-            console.warn('Cloudinary upload error for file', i, cldErr);
+      if (fileInput.files.length > 0) {
+        for (let i = 0; i < fileInput.files.length; i++) {
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading photo ${i + 1} of ${fileInput.files.length}...`;
           }
-        }
+          const file = fileInput.files[i];
+          let cldUrl = null;
 
-        // 2. Local compressed canvas backup
-        if (!cldUrl) {
-          try {
-            cldUrl = await compressImageFile(file, 800, 800, 0.75);
-          } catch (err) {}
-        }
-
-        if (cldUrl) {
-          uploadedImages.push(cldUrl);
-        }
-      }
-    }
-
-    if (imageUrlInput) {
-      const extraUrls = imageUrlInput.split(',').map(u => u.trim()).filter(Boolean);
-      uploadedImages = [...uploadedImages, ...extraUrls];
-    }
-
-    // Colors & photos mapping
-    const colors = [];
-    const colorRows = colorVariantsList ? colorVariantsList.querySelectorAll('.color-variant-row') : [];
-
-    for (let row of colorRows) {
-      const cNameInput = row.querySelector('.cvar-name');
-      const cHexInput = row.querySelector('.cvar-hex');
-      const cFileInput = row.querySelector('.cvar-file');
-
-      const cName = cNameInput ? cNameInput.value.trim() : '';
-      const cHex = cHexInput ? cHexInput.value : '#E5C158';
-      const cFile = cFileInput && cFileInput.files.length > 0 ? cFileInput.files[0] : null;
-
-      if (cName) {
-        let cImg = null;
-        if (cFile) {
+          // 1. Try Cloudinary direct upload
           if (cldCloud && cldPreset) {
             try {
               const cldForm = new FormData();
-              cldForm.append('file', cFile);
+              cldForm.append('file', file);
               cldForm.append('upload_preset', cldPreset);
+
               const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cldCloud}/image/upload`, {
                 method: 'POST',
                 body: cldForm
               });
+
               if (cldRes.ok) {
                 const cldData = await cldRes.json();
-                if (cldData.secure_url) cImg = cldData.secure_url;
+                if (cldData.secure_url) {
+                  cldUrl = cldData.secure_url;
+                }
               }
+            } catch (cldErr) {
+              console.warn('Cloudinary upload error for file', i, cldErr);
+            }
+          }
+
+          // 2. Local compressed canvas backup
+          if (!cldUrl) {
+            try {
+              cldUrl = await compressImageFile(file, 800, 800, 0.75);
             } catch (err) {}
           }
-          if (!cImg) {
-            try { cImg = await compressImageFile(cFile, 800, 800, 0.75); } catch (err) {}
+
+          if (cldUrl) {
+            uploadedImages.push(cldUrl);
           }
         }
-        if (cImg) {
-          uploadedImages.push(cImg);
+      }
+
+      if (imageUrlInput) {
+        const extraUrls = imageUrlInput.split(',').map(u => u.trim()).filter(Boolean);
+        uploadedImages = [...uploadedImages, ...extraUrls];
+      }
+
+      // Colors & photos mapping
+      const colors = [];
+      const colorRows = colorVariantsList ? colorVariantsList.querySelectorAll('.color-variant-row') : [];
+
+      let rowIdx = 1;
+      for (let row of colorRows) {
+        const cNameInput = row.querySelector('.cvar-name');
+        const cHexInput = row.querySelector('.cvar-hex');
+        const cFileInput = row.querySelector('.cvar-file');
+
+        const cName = cNameInput ? cNameInput.value.trim() : '';
+        const cHex = cHexInput ? cHexInput.value : '#E5C158';
+        const cFile = cFileInput && cFileInput.files.length > 0 ? cFileInput.files[0] : null;
+
+        if (cName) {
+          let cImg = null;
+          if (cFile) {
+            if (submitBtn) {
+              submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading ${cName} color photo...`;
+            }
+            if (cldCloud && cldPreset) {
+              try {
+                const cldForm = new FormData();
+                cldForm.append('file', cFile);
+                cldForm.append('upload_preset', cldPreset);
+                const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cldCloud}/image/upload`, {
+                  method: 'POST',
+                  body: cldForm
+                });
+                if (cldRes.ok) {
+                  const cldData = await cldRes.json();
+                  if (cldData.secure_url) cImg = cldData.secure_url;
+                }
+              } catch (err) {}
+            }
+            if (!cImg) {
+              try { cImg = await compressImageFile(cFile, 800, 800, 0.75); } catch (err) {}
+            }
+          }
+          if (cImg) {
+            uploadedImages.push(cImg);
+          }
+          colors.push({
+            name: cName,
+            hex: cHex,
+            image: cImg
+          });
         }
-        colors.push({
-          name: cName,
-          hex: cHex,
-          image: cImg
+        rowIdx++;
+      }
+
+      if (colors.length === 0 && colorNames.length > 0) {
+        colorNames.forEach((name, idx) => {
+          colors.push({
+            name: name,
+            hex: '#E5C158',
+            image: uploadedImages[idx] || uploadedImages[0] || null
+          });
         });
       }
-    }
 
-    if (colors.length === 0 && colorNames.length > 0) {
-      colorNames.forEach((name, idx) => {
-        colors.push({
-          name: name,
-          hex: '#E5C158',
-          image: uploadedImages[idx] || uploadedImages[0] || null
-        });
-      });
-    }
-
-    const finalImage = uploadedImages[0] || 'assets/images/chrome_hearts_black_tee.jpg';
-    if (uploadedImages.length === 0) {
-      uploadedImages = [finalImage];
-    }
-
-    colors.forEach(c => {
-      if (!c.image) c.image = finalImage;
-    });
-
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('category', category);
-    formData.append('price', price);
-    formData.append('description', description);
-    formData.append('sizes', JSON.stringify(sizes));
-    formData.append('stockQty', stockQty);
-    formData.append('imageUrl', finalImage);
-    formData.append('images', JSON.stringify(uploadedImages));
-    formData.append('colors', JSON.stringify(colors));
-    formData.append('tags', JSON.stringify(tags));
-    formData.append('featured', featured);
-
-    let createdProduct = null;
-
-    try {
-      const res = await fetch('/api/products', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.product) {
-          createdProduct = data.product;
-        }
+      const finalImage = uploadedImages[0] || 'assets/images/chrome_hearts_black_tee.jpg';
+      if (uploadedImages.length === 0) {
+        uploadedImages = [finalImage];
       }
-    } catch (err) {
-      console.warn('Backend upload failed, creating product locally:', err);
-    }
 
-    if (!createdProduct) {
-      createdProduct = {
-        id: 'prod_' + Date.now(),
-        title: title || 'New Streetwear Item',
-        category: category || 'T-Shirts',
-        price: price,
-        image: finalImage,
-        images: uploadedImages,
-        colors: colors,
-        description: description,
-        sizes: sizes,
-        inStock: true,
-        stockQty: stockQty,
-        featured: featured,
-        tags: tags,
-        createdAt: new Date().toISOString()
-      };
-    } else {
-      createdProduct.image = finalImage;
-      createdProduct.images = uploadedImages;
-      createdProduct.colors = colors;
-    }
+      colors.forEach(c => {
+        if (!c.image) c.image = finalImage;
+      });
 
-    // Save to localStorage safely
-    try {
-      const customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
-      const filtered = customProducts.filter(p => p.id !== createdProduct.id);
-      filtered.unshift(createdProduct);
-      localStorage.setItem('vibe_custom_products', JSON.stringify(filtered));
-    } catch (storageErr) {
-      console.warn('localStorage quota reached, keeping latest 15 listings:', storageErr);
+      if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saving to catalog...';
+      }
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('category', category);
+      formData.append('price', price);
+      formData.append('description', description);
+      formData.append('sizes', JSON.stringify(sizes));
+      formData.append('stockQty', stockQty);
+      formData.append('imageUrl', finalImage);
+      formData.append('images', JSON.stringify(uploadedImages));
+      formData.append('colors', JSON.stringify(colors));
+      formData.append('tags', JSON.stringify(tags));
+      formData.append('featured', featured);
+
+      let createdProduct = null;
+
       try {
-        let customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
-        customProducts = customProducts.filter(p => p.id !== createdProduct.id);
-        customProducts.unshift(createdProduct);
-        customProducts = customProducts.slice(0, 15);
-        localStorage.setItem('vibe_custom_products', JSON.stringify(customProducts));
-      } catch (e) {
-        console.error('Could not save to localStorage:', e);
+        const res = await fetch('/api/products', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.product) {
+            createdProduct = data.product;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend upload failed, creating product locally:', err);
+      }
+
+      if (!createdProduct) {
+        createdProduct = {
+          id: 'prod_' + Date.now(),
+          title: title || 'New Streetwear Item',
+          category: category || 'T-Shirts',
+          price: price,
+          image: finalImage,
+          images: uploadedImages,
+          colors: colors,
+          description: description,
+          sizes: sizes,
+          inStock: true,
+          stockQty: stockQty,
+          featured: featured,
+          tags: tags,
+          createdAt: new Date().toISOString()
+        };
+      } else {
+        createdProduct.image = finalImage;
+        createdProduct.images = uploadedImages;
+        createdProduct.colors = colors;
+      }
+
+      // Save to localStorage safely
+      try {
+        const customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+        const filtered = customProducts.filter(p => p.id !== createdProduct.id);
+        filtered.unshift(createdProduct);
+        localStorage.setItem('vibe_custom_products', JSON.stringify(filtered));
+      } catch (storageErr) {
+        console.warn('localStorage quota reached, keeping latest 15 listings:', storageErr);
+        try {
+          let customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+          customProducts = customProducts.filter(p => p.id !== createdProduct.id);
+          customProducts.unshift(createdProduct);
+          customProducts = customProducts.slice(0, 15);
+          localStorage.setItem('vibe_custom_products', JSON.stringify(customProducts));
+        } catch (e) {
+          console.error('Could not save to localStorage:', e);
+        }
+      }
+
+      alert('Product added successfully! (' + uploadedImages.length + ' photo' + (uploadedImages.length > 1 ? 's' : '') + ' saved)');
+      addProductForm.reset();
+      if (colorVariantsList) colorVariantsList.innerHTML = '';
+      await fetchProducts();
+      renderInventoryTable();
+    } catch (error) {
+      console.error('Add product error:', error);
+      alert('An error occurred while uploading. Please try again.');
+    } finally {
+      isSubmittingProduct = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
       }
     }
-
-    alert('Product added successfully! (' + uploadedImages.length + ' photo' + (uploadedImages.length > 1 ? 's' : '') + ' uploaded)');
-    addProductForm.reset();
-    await fetchProducts();
-    renderInventoryTable();
   }
 
   async function loadOrdersTable() {
@@ -1290,7 +1345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Admin Portal
     openAdminBtn.addEventListener('click', openAdminPortal);
     heroAdminBtn.addEventListener('click', openAdminPortal);
-    closeAdminModal.addEventListener('click', () => adminModal.classList.remove('active'));
+    closeAdminModal.addEventListener('click', closeAdminPortalFunc);
     adminLoginForm.addEventListener('submit', handleAdminLogin);
     adminLogoutBtn.addEventListener('click', handleAdminLogout);
 
