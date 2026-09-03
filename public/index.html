@@ -20,7 +20,7 @@
   <!-- TOP PROMO BANNER -->
   <div class="top-bar">
     <div class="container top-bar-content">
-      <span><i class="fa-solid fa-truck-fast"></i> Express Delivery Across Kenya &nbsp;|&nbsp; Pay via Safaricom M-Pesa</span>
+      <span><i class="fa-solid fa-truck-fast"></i> Express Delivery Across Kenya &nbsp;|&nbsp; Premium Streetwear &amp; Footwear</span>
       <div class="top-bar-links">
         <a href="tel:+254712345678"><i class="fa-solid fa-phone"></i> +254 712 345 678</a>
         <button id="openAdminBtn" class="admin-top-link"><i class="fa-solid fa-user-shield"></i> Admin Portal</button>
@@ -60,7 +60,7 @@
       <div class="hero-text">
         <span class="hero-tag"><i class="fa-solid fa-fire"></i> NEW DROPS 2026</span>
         <h1>STREETWEAR &amp; KICKS CATALOGUE</h1>
-        <p>Discover premium graphic tees, 3-piece short sets, knitted sweaters, and authentic retro kicks. Fast order processing with M-Pesa STK Push payment.</p>
+        <p>Discover premium graphic tees, 3-piece short sets, knitted sweaters, and authentic retro kicks with nationwide delivery.</p>
         <div class="hero-buttons">
           <a href="#shopSection" class="btn btn-gold"><i class="fa-solid fa-compass"></i> Explore Collection</a>
           <button class="btn btn-outline" id="heroAdminBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Admin Upload</button>
@@ -72,8 +72,8 @@
           <p>Authentic Quality</p>
         </div>
         <div class="stat-card">
-          <h3>M-PESA</h3>
-          <p>Instant STK Push</p>
+          <h3>EXPRESS</h3>
+          <p>Delivery Nationwide</p>
         </div>
         <div class="stat-card">
           <h3>24/7</h3>
@@ -406,13 +406,24 @@
               </div>
 
               <div class="form-section">
+                <!-- Upload Feedback Alert -->
+                <div id="uploadStatusAlert" class="upload-status-alert" style="display: none;"></div>
+
                 <h3>Product Image &amp; Tags</h3>
                 <div class="form-group">
-                  <label>Upload Image File:</label>
-                  <div class="file-upload-box">
+                  <label><i class="fa-solid fa-camera"></i> Upload Image Files:</label>
+                  <div class="file-upload-box" id="fileUploadBox">
                     <input type="file" id="prodImageFile" multiple accept="image/*">
                     <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-                    <p>Click or drag multiple photos here</p>
+                    <p id="uploadBoxPrompt">Click or drag photos here to upload</p>
+                  </div>
+                  <!-- Image Preview Bar & Counter -->
+                  <div class="image-preview-bar" id="imagePreviewBar" style="display: none;">
+                    <div class="preview-header">
+                      <span class="preview-count-badge" id="previewCountBadge"><i class="fa-solid fa-images"></i> 0 pictures uploaded</span>
+                      <button type="button" class="btn-clear-previews" id="clearPreviewsBtn"><i class="fa-solid fa-trash-can"></i> Clear Selection</button>
+                    </div>
+                    <div class="preview-grid" id="imagePreviewGrid"></div>
                   </div>
                 </div>
                 <div class="form-group">
@@ -575,7 +586,7 @@
     <div class="container footer-content">
       <div class="footer-brand">
         <span class="logo-badge">VIBE</span>
-        <p>Premium Streetwear Apparel &amp; Kicks Store. Powered by Safaricom M-Pesa Daraja payment integration.</p>
+        <p>Premium Streetwear Apparel &amp; Kicks Store. Exclusive urban collection delivered nationwide.</p>
       </div>
       <div class="footer-bottom">
         <p>&copy; 2026 VIBE APPAREL &amp; KICKS. All rights reserved.</p>

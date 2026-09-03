@@ -85,6 +85,96 @@ document.addEventListener('DOMContentLoaded', () => {
   const colorVariantsList = document.getElementById('colorVariantsList');
   const addColorVariantBtn = document.getElementById('addColorVariantBtn');
 
+  // Image Upload & Preview DOM
+  const prodImageFileInput = document.getElementById('prodImageFile');
+  const imagePreviewBar = document.getElementById('imagePreviewBar');
+  const previewCountBadge = document.getElementById('previewCountBadge');
+  const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+  const clearPreviewsBtn = document.getElementById('clearPreviewsBtn');
+  const uploadStatusAlert = document.getElementById('uploadStatusAlert');
+
+  let selectedUploadFiles = [];
+
+  function showUploadAlert(type, message) {
+    if (!uploadStatusAlert) return;
+    uploadStatusAlert.className = `upload-status-alert ${type}`;
+    uploadStatusAlert.innerHTML = message;
+    uploadStatusAlert.style.display = 'flex';
+  }
+
+  function hideUploadAlert() {
+    if (uploadStatusAlert) {
+      uploadStatusAlert.style.display = 'none';
+      uploadStatusAlert.className = 'upload-status-alert';
+      uploadStatusAlert.innerHTML = '';
+    }
+  }
+
+  function renderUploadPreviews() {
+    if (!imagePreviewBar || !imagePreviewGrid || !previewCountBadge) return;
+
+    if (selectedUploadFiles.length === 0) {
+      imagePreviewBar.style.display = 'none';
+      imagePreviewGrid.innerHTML = '';
+      previewCountBadge.innerHTML = `<i class="fa-solid fa-images"></i> 0 pictures uploaded`;
+      return;
+    }
+
+    imagePreviewBar.style.display = 'block';
+    previewCountBadge.innerHTML = `<i class="fa-solid fa-images"></i> ${selectedUploadFiles.length} picture${selectedUploadFiles.length > 1 ? 's' : ''} uploaded / selected`;
+
+    imagePreviewGrid.innerHTML = '';
+    selectedUploadFiles.forEach((file, idx) => {
+      const card = document.createElement('div');
+      card.className = 'preview-thumb-card';
+
+      const img = document.createElement('img');
+      img.alt = file.name || `Photo ${idx + 1}`;
+
+      if (file instanceof File || file instanceof Blob) {
+        const reader = new FileReader();
+        reader.onload = (e) => { img.src = e.target.result; };
+        reader.readAsDataURL(file);
+      } else if (typeof file === 'string') {
+        img.src = file;
+      }
+
+      const rmBtn = document.createElement('button');
+      rmBtn.type = 'button';
+      rmBtn.className = 'remove-thumb-btn';
+      rmBtn.title = 'Remove photo';
+      rmBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      rmBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedUploadFiles.splice(idx, 1);
+        renderUploadPreviews();
+      });
+
+      card.appendChild(img);
+      card.appendChild(rmBtn);
+      imagePreviewGrid.appendChild(card);
+    });
+  }
+
+  if (prodImageFileInput) {
+    prodImageFileInput.addEventListener('change', (e) => {
+      hideUploadAlert();
+      const files = Array.from(e.target.files);
+      if (files.length > 0) {
+        selectedUploadFiles = [...selectedUploadFiles, ...files];
+        renderUploadPreviews();
+      }
+    });
+  }
+
+  if (clearPreviewsBtn) {
+    clearPreviewsBtn.addEventListener('click', () => {
+      selectedUploadFiles = [];
+      if (prodImageFileInput) prodImageFileInput.value = '';
+      renderUploadPreviews();
+    });
+  }
+
   function addColorVariantRow(name = '', hex = '#E5C158') {
     if (!colorVariantsList) return;
     const row = document.createElement('div');
@@ -94,9 +184,28 @@ document.addEventListener('DOMContentLoaded', () => {
       <input type="text" class="cvar-name" value="${name}" placeholder="Color Name (e.g. Royal Blue)" style="flex: 1; padding: 6px 10px; font-size: 0.85rem; border-radius: var(--radius-sm); background: #000; border: 1px solid var(--border-color); color: #fff;">
       <input type="color" class="cvar-hex" value="${hex}" style="width: 38px; height: 34px; padding: 2px; border-radius: 4px; border: 0; cursor: pointer; background: transparent;">
       <input type="file" class="cvar-file" accept="image/*" style="flex: 1.2; font-size: 0.75rem; color: var(--text-muted);">
+      <div class="cvar-preview-wrapper" style="display:none;"><img class="cvar-preview-thumb" src="" alt="preview"></div>
       <button type="button" class="remove-cvar-btn" style="color: #EF4444; background: none; border: 0; cursor: pointer; font-size: 1rem; padding: 4px;"><i class="fa-solid fa-trash"></i></button>
     `;
     colorVariantsList.appendChild(row);
+
+    const cFile = row.querySelector('.cvar-file');
+    const cPrevWrap = row.querySelector('.cvar-preview-wrapper');
+    const cPrevImg = row.querySelector('.cvar-preview-thumb');
+    if (cFile) {
+      cFile.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            cPrevImg.src = ev.target.result;
+            cPrevWrap.style.display = 'block';
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        } else {
+          cPrevWrap.style.display = 'none';
+        }
+      });
+    }
   }
 
   if (addColorVariantBtn) {
@@ -911,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const colorNames = colorInputRaw ? colorInputRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
 
       const fileInput = document.getElementById('prodImageFile');
+      const filesToProcess = selectedUploadFiles.length > 0 ? selectedUploadFiles : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
 
       let uploadedImages = [];
 
@@ -918,12 +1028,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const cldCloud = localStorage.getItem('vibe_cloudinary_cloud_name') || 'yvbo2mtt';
       const cldPreset = localStorage.getItem('vibe_cloudinary_preset') || 'clothstore_preset';
 
-      if (fileInput.files.length > 0) {
-        for (let i = 0; i < fileInput.files.length; i++) {
+      if (filesToProcess.length > 0) {
+        showUploadAlert('info', `<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading ${filesToProcess.length} picture(s)... Please wait.`);
+        for (let i = 0; i < filesToProcess.length; i++) {
+          const statusText = `<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading photo ${i + 1} of ${filesToProcess.length}...`;
           if (submitBtn) {
-            submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading photo ${i + 1} of ${fileInput.files.length}...`;
+            submitBtn.innerHTML = statusText;
           }
-          const file = fileInput.files[i];
+          showUploadAlert('info', statusText);
+          const file = filesToProcess[i];
           let cldUrl = null;
 
           // 1. Try Cloudinary direct upload
@@ -984,9 +1097,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cName) {
           let cImg = null;
           if (cFile) {
-            if (submitBtn) {
-              submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading ${cName} color photo...`;
-            }
+            const statusText = `<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading ${cName} color photo...`;
+            if (submitBtn) submitBtn.innerHTML = statusText;
+            showUploadAlert('info', statusText);
             if (cldCloud && cldPreset) {
               try {
                 const cldForm = new FormData();
@@ -1038,7 +1151,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (submitBtn) {
-        submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saving to catalog...';
+        submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saving product to catalog...';
       }
 
       const formData = new FormData();
@@ -1055,9 +1168,9 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('featured', featured);
 
       // Attach actual binary File objects to FormData so Multer on server saves them to /uploads/
-      if (fileInput && fileInput.files && fileInput.files.length > 0) {
-        for (let i = 0; i < fileInput.files.length; i++) {
-          formData.append('files', fileInput.files[i]);
+      if (filesToProcess.length > 0) {
+        for (let i = 0; i < filesToProcess.length; i++) {
+          formData.append('files', filesToProcess[i]);
         }
       }
       if (colorRows && colorRows.length > 0) {
@@ -1126,14 +1239,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      alert('Product added successfully! (' + uploadedImages.length + ' photo' + (uploadedImages.length > 1 ? 's' : '') + ' saved)');
+      showUploadAlert('success', `
+        <i class="fa-solid fa-circle-check" style="font-size: 1.8rem; color: #10B981;"></i>
+        <div>
+          <strong style="font-size: 1.05rem;">Product Published Successfully!</strong><br>
+          "<strong>${title}</strong>" with <strong>${uploadedImages.length} picture${uploadedImages.length > 1 ? 's' : ''}</strong> is now live in store.
+        </div>
+      `);
+
       addProductForm.reset();
+      selectedUploadFiles = [];
+      if (prodImageFileInput) prodImageFileInput.value = '';
+      renderUploadPreviews();
       if (colorVariantsList) colorVariantsList.innerHTML = '';
+
+      const tabAddItem = document.getElementById('tab-add-item');
+      if (tabAddItem) tabAddItem.scrollTop = 0;
+
       await fetchProducts();
       renderInventoryTable();
     } catch (error) {
       console.error('Add product error:', error);
-      alert('An error occurred while uploading. Please try again.');
+      showUploadAlert('error', `
+        <i class="fa-solid fa-circle-exclamation" style="font-size: 1.5rem;"></i>
+        <div><strong>Upload Error:</strong> An error occurred while saving. Please check details and try again.</div>
+      `);
     } finally {
       isSubmittingProduct = false;
       if (submitBtn) {
