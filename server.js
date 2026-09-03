@@ -9,8 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static frontend files and asset folders
 app.use(express.static(path.join(__dirname, 'public')));
@@ -30,11 +30,35 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
+    const ext = path.extname(file.originalname) || '.jpg';
     cb(null, 'item-' + uniqueSuffix + ext);
   }
 });
 const upload = multer({ storage });
+
+// Helper to save base64 data URL to local physical file
+function saveBase64ToFile(str) {
+  if (!str || typeof str !== 'string') return str;
+  if (!str.startsWith('data:image/')) return str;
+
+  try {
+    const matches = str.match(/^data:image\/([a-zA-Z0-9\+\-\.]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) return str;
+
+    let ext = matches[1].toLowerCase();
+    if (ext === 'jpeg') ext = 'jpg';
+    const base64Data = matches[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    const fileName = 'item-b64-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + '.' + ext;
+    const filePath = path.join(uploadDir, fileName);
+    fs.writeFileSync(filePath, buffer);
+    return `/uploads/${fileName}`;
+  } catch (err) {
+    console.error('Error saving base64 image to file:', err);
+    return str;
+  }
+}
 
 // Helper functions for reading/writing data
 const DATA_DIR = path.join(__dirname, 'data');
@@ -95,9 +119,12 @@ app.get('/api/products', (req, res) => {
 app.post('/api/products', upload.any(), (req, res) => {
   const products = readJson(PRODUCTS_FILE, []);
   
-  let imageUrl = req.body.imageUrl || '';
-  let images = [];
+  let uploadedPaths = [];
+  if (req.files && req.files.length > 0) {
+    uploadedPaths = req.files.map(f => `/uploads/${f.filename}`);
+  }
 
+  let images = [];
   if (req.body.images) {
     if (typeof req.body.images === 'string') {
       try {
@@ -110,19 +137,18 @@ app.post('/api/products', upload.any(), (req, res) => {
     }
   }
 
-  if (req.files && req.files.length > 0) {
-    const uploadedPaths = req.files.map(f => `/uploads/${f.filename}`);
-    images = [...images, ...uploadedPaths];
-    if (!imageUrl) imageUrl = uploadedPaths[0];
+  images = [...uploadedPaths, ...images];
+  images = images.map(img => saveBase64ToFile(img)).filter(Boolean);
+
+  let imageUrl = req.body.imageUrl ? saveBase64ToFile(req.body.imageUrl) : '';
+  if (!imageUrl && images.length > 0) {
+    imageUrl = images[0];
+  }
+  if (!imageUrl) {
+    imageUrl = 'assets/images/chrome_hearts_black_tee.jpg';
   }
 
-  if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:image/'))) {
-    // Preserve Cloudinary or Data URL
-  } else if (!imageUrl) {
-    imageUrl = images.length > 0 ? images[0] : 'assets/images/chrome_hearts_black_tee.jpg';
-  }
-
-  if (images.length === 0 && imageUrl) {
+  if (images.length === 0) {
     images = [imageUrl];
   }
 
@@ -151,6 +177,17 @@ app.post('/api/products', upload.any(), (req, res) => {
     } catch (e) {
       colors = colors.split(',').map(c => ({ name: c.trim(), image: imageUrl })).filter(Boolean);
     }
+  }
+  if (Array.isArray(colors)) {
+    colors = colors.map(c => {
+      if (typeof c === 'object' && c !== null) {
+        return {
+          ...c,
+          image: c.image ? saveBase64ToFile(c.image) : imageUrl
+        };
+      }
+      return c;
+    });
   }
 
   const newProduct = {
@@ -185,9 +222,13 @@ app.put('/api/products/:id', upload.any(), (req, res) => {
   }
 
   const existing = products[index];
-  let imageUrl = req.body.imageUrl || existing.image;
+  
+  let uploadedPaths = [];
+  if (req.files && req.files.length > 0) {
+    uploadedPaths = req.files.map(f => `/uploads/${f.filename}`);
+  }
 
-  let images = existing.images || [imageUrl];
+  let images = existing.images || [existing.image];
   if (req.body.images) {
     if (typeof req.body.images === 'string') {
       try { images = JSON.parse(req.body.images); } catch (e) { images = req.body.images.split(',').map(s => s.trim()).filter(Boolean); }
@@ -195,11 +236,10 @@ app.put('/api/products/:id', upload.any(), (req, res) => {
       images = req.body.images;
     }
   }
+  images = [...uploadedPaths, ...images].map(img => saveBase64ToFile(img)).filter(Boolean);
 
-  if (req.files && req.files.length > 0) {
-    const uploadedPaths = req.files.map(f => `/uploads/${f.filename}`);
-    images = [...images, ...uploadedPaths];
-  }
+  let imageUrl = req.body.imageUrl ? saveBase64ToFile(req.body.imageUrl) : existing.image;
+  if (!imageUrl && images.length > 0) imageUrl = images[0];
 
   let colors = existing.colors || [];
   if (req.body.colors) {
@@ -208,6 +248,17 @@ app.put('/api/products/:id', upload.any(), (req, res) => {
     } else if (Array.isArray(req.body.colors)) {
       colors = req.body.colors;
     }
+  }
+  if (Array.isArray(colors)) {
+    colors = colors.map(c => {
+      if (typeof c === 'object' && c !== null) {
+        return {
+          ...c,
+          image: c.image ? saveBase64ToFile(c.image) : imageUrl
+        };
+      }
+      return c;
+    });
   }
 
   let sizes = req.body.sizes ? (typeof req.body.sizes === 'string' ? JSON.parse(req.body.sizes) : req.body.sizes) : existing.sizes;

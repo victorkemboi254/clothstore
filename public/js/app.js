@@ -294,23 +294,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.hash === '#admin' || localStorage.getItem('vibe_last_view') === 'admin') {
       openAdminPortal();
     }
+
+    // Auto-sync polling every 10 seconds and on tab focus across all devices
+    setInterval(fetchProducts, 10000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        fetchProducts();
+      }
+    });
+    window.addEventListener('focus', fetchProducts);
   }
 
   async function fetchProducts() {
     let fetchedList = [];
+    let isBackendAvailable = false;
     try {
       const res = await fetch('/api/products');
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           fetchedList = data;
+          isBackendAvailable = true;
         }
       }
     } catch (err) {
       console.warn('Failed to fetch from backend API, attempting static fallback:', err);
     }
 
-    if (fetchedList.length === 0) {
+    if (fetchedList.length === 0 && !isBackendAvailable) {
       try {
         const staticRes = await fetch('data/products.json');
         if (staticRes.ok) {
@@ -322,16 +333,50 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (staticErr) {}
     }
 
-    if (fetchedList.length === 0) {
+    if (fetchedList.length === 0 && !isBackendAvailable) {
       fetchedList = [...DEFAULT_PRODUCTS];
     }
 
-    // Merge custom listings saved in localStorage
+    // Check for unsynced local custom items saved in localStorage
     const localCustom = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
     const existingIds = new Set(fetchedList.map(p => p.id));
     const missingCustom = localCustom.filter(p => !existingIds.has(p.id));
 
-    products = [...missingCustom, ...fetchedList];
+    // If backend is available and there are unsynced local custom products, push them to the server
+    if (isBackendAvailable && missingCustom.length > 0) {
+      for (const item of missingCustom) {
+        try {
+          const formData = new FormData();
+          formData.append('title', item.title || '');
+          formData.append('category', item.category || '');
+          formData.append('price', item.price || 0);
+          formData.append('description', item.description || '');
+          formData.append('sizes', JSON.stringify(item.sizes || []));
+          formData.append('stockQty', item.stockQty || 10);
+          formData.append('imageUrl', item.image || '');
+          formData.append('images', JSON.stringify(item.images || []));
+          formData.append('colors', JSON.stringify(item.colors || []));
+          formData.append('tags', JSON.stringify(item.tags || []));
+          formData.append('featured', item.featured || false);
+
+          const syncRes = await fetch('/api/products', { method: 'POST', body: formData });
+          if (syncRes.ok) {
+            const syncData = await syncRes.json();
+            if (syncData.success && syncData.product) {
+              fetchedList.unshift(syncData.product);
+              // Remove synced product from localStorage
+              const updatedLocal = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]')
+                .filter(p => p.id !== item.id);
+              localStorage.setItem('vibe_custom_products', JSON.stringify(updatedLocal));
+            }
+          }
+        } catch (syncErr) {
+          console.warn('Could not sync offline product:', item.id, syncErr);
+        }
+      }
+    }
+
+    products = [...missingCustom.filter(p => !fetchedList.some(f => f.id === p.id)), ...fetchedList];
     renderCatalog();
   }
 
@@ -1009,7 +1054,23 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('tags', JSON.stringify(tags));
       formData.append('featured', featured);
 
+      // Attach actual binary File objects to FormData so Multer on server saves them to /uploads/
+      if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        for (let i = 0; i < fileInput.files.length; i++) {
+          formData.append('files', fileInput.files[i]);
+        }
+      }
+      if (colorRows && colorRows.length > 0) {
+        colorRows.forEach(row => {
+          const cFileInput = row.querySelector('.cvar-file');
+          if (cFileInput && cFileInput.files && cFileInput.files.length > 0) {
+            formData.append('files', cFileInput.files[0]);
+          }
+        });
+      }
+
       let createdProduct = null;
+      let uploadSuccess = false;
 
       try {
         const res = await fetch('/api/products', {
@@ -1021,51 +1082,47 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await res.json();
           if (data.success && data.product) {
             createdProduct = data.product;
+            uploadSuccess = true;
           }
         }
       } catch (err) {
         console.warn('Backend upload failed, creating product locally:', err);
       }
 
-      if (!createdProduct) {
-        createdProduct = {
-          id: 'prod_' + Date.now(),
-          title: title || 'New Streetwear Item',
-          category: category || 'T-Shirts',
-          price: price,
-          image: finalImage,
-          images: uploadedImages,
-          colors: colors,
-          description: description,
-          sizes: sizes,
-          inStock: true,
-          stockQty: stockQty,
-          featured: featured,
-          tags: tags,
-          createdAt: new Date().toISOString()
-        };
-      } else {
-        createdProduct.image = finalImage;
-        createdProduct.images = uploadedImages;
-        createdProduct.colors = colors;
-      }
-
-      // Save to localStorage safely
-      try {
-        const customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
-        const filtered = customProducts.filter(p => p.id !== createdProduct.id);
-        filtered.unshift(createdProduct);
-        localStorage.setItem('vibe_custom_products', JSON.stringify(filtered));
-      } catch (storageErr) {
-        console.warn('localStorage quota reached, keeping latest 15 listings:', storageErr);
+      if (uploadSuccess) {
+        // Clean up any stale local copy of this product from localStorage
         try {
           let customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
           customProducts = customProducts.filter(p => p.id !== createdProduct.id);
-          customProducts.unshift(createdProduct);
-          customProducts = customProducts.slice(0, 15);
           localStorage.setItem('vibe_custom_products', JSON.stringify(customProducts));
-        } catch (e) {
-          console.error('Could not save to localStorage:', e);
+        } catch (e) {}
+      } else {
+        if (!createdProduct) {
+          createdProduct = {
+            id: 'prod_' + Date.now(),
+            title: title || 'New Streetwear Item',
+            category: category || 'T-Shirts',
+            price: price,
+            image: finalImage,
+            images: uploadedImages,
+            colors: colors,
+            description: description,
+            sizes: sizes,
+            inStock: true,
+            stockQty: stockQty,
+            featured: featured,
+            tags: tags,
+            createdAt: new Date().toISOString()
+          };
+        }
+        // Save to local storage only if offline/server unreachable
+        try {
+          const customProducts = JSON.parse(localStorage.getItem('vibe_custom_products') || '[]');
+          const filtered = customProducts.filter(p => p.id !== createdProduct.id);
+          filtered.unshift(createdProduct);
+          localStorage.setItem('vibe_custom_products', JSON.stringify(filtered));
+        } catch (storageErr) {
+          console.warn('localStorage error:', storageErr);
         }
       }
 
