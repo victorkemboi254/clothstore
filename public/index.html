@@ -22,6 +22,7 @@
     <div class="container top-bar-content">
       <span><i class="fa-solid fa-truck-fast"></i> Express Delivery Across Kenya &nbsp;|&nbsp; Premium Streetwear &amp; Footwear</span>
       <div class="top-bar-links">
+        <a href="mailto:sneakersstoreoutfit7@gmail.com"><i class="fa-solid fa-envelope"></i> sneakersstoreoutfit7@gmail.com</a>
         <a href="tel:0103296216"><i class="fa-solid fa-phone"></i> 0103 296 216</a>
         <a href="https://www.facebook.com/profile.php?id=61594030860260" target="_blank" rel="noopener" class="top-social-link"><i class="fa-brands fa-facebook"></i> Facebook</a>
         <button id="openAdminBtn" class="admin-top-link"><i class="fa-solid fa-user-shield"></i> Admin Portal</button>
@@ -208,55 +209,237 @@
         </div>
 
         <button class="btn btn-mpesa btn-full" id="proceedMpesaBtn">
-          <i class="fa-solid fa-mobile-screen-button"></i> Pay via Safaricom M-Pesa
+          <i class="fa-solid fa-credit-card"></i> Proceed to Checkout &amp; Billing
         </button>
       </div>
     </div>
   </div>
 
-  <!-- M-PESA STK PUSH PAYMENT MODAL -->
+  <!-- M-PESA STK PUSH & BILLING CHECKOUT MODAL -->
   <div class="modal-backdrop" id="mpesaModal">
-    <div class="modal-card modal-md">
+    <div class="modal-card modal-xl checkout-modal-card">
       <button class="modal-close" id="closeMpesaModal"><i class="fa-solid fa-xmark"></i></button>
       
-      <!-- STK Step 1: Input Details -->
+      <!-- STK Step 1: Billing & Order Checkout -->
       <div id="mpesaStep1" class="mpesa-step">
-        <div class="mpesa-header-badge">
-          <i class="fa-solid fa-mobile-retro"></i>
-          <span>SAFARICOM M-PESA DARAJA</span>
-        </div>
-        <h2>Instant M-Pesa Payment</h2>
-        <p class="mpesa-subtext">Enter your M-Pesa registered phone number below. You will receive an instant popup on your phone to enter your PIN.</p>
-        
-        <div class="order-summary-mini">
-          <div class="summary-row">
-            <span>Total Items:</span>
-            <strong id="mpesaItemCount">0 items</strong>
+        <div class="checkout-header-banner">
+          <div class="mpesa-header-badge">
+            <i class="fa-solid fa-wallet"></i>
+            <span>SECURE CHECKOUT</span>
           </div>
-          <div class="summary-row highlight">
-            <span>Amount to Pay:</span>
-            <strong id="mpesaAmount">KES 0</strong>
-          </div>
+          <p class="checkout-subtext">Complete your billing address, shipment preferences, and select your preferred payment method below.</p>
         </div>
 
-        <form id="mpesaForm" class="mpesa-form">
-          <div class="form-group">
-            <label for="customerPhone"><i class="fa-solid fa-phone"></i> M-Pesa Phone Number:</label>
-            <div class="phone-input-group">
-              <span class="country-code">+254</span>
-              <input type="tel" id="customerPhone" placeholder="712345678 or 0712345678" required>
+        <form id="mpesaForm" class="checkout-billing-form">
+          <div class="checkout-grid-container">
+            
+            <!-- LEFT COLUMN: BILLING DETAILS & ADDITIONAL INFO -->
+            <div class="checkout-left-col">
+              <!-- BILLING DETAILS SECTION -->
+              <div class="billing-section">
+                <h2 class="billing-section-title">BILLING DETAILS</h2>
+                
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label for="billingFirstName">First Name *</label>
+                    <input type="text" id="billingFirstName" placeholder="First Name" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="billingLastName">Last Name *</label>
+                    <input type="text" id="billingLastName" placeholder="Last Name" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="billingCompany">Company Name (optional)</label>
+                  <input type="text" id="billingCompany" placeholder="Company Name">
+                </div>
+
+                <div class="form-group">
+                  <label for="billingCountry">Country / Region *</label>
+                  <select id="billingCountry" required>
+                    <option value="United States (US)" selected>United States (US)</option>
+                    <option value="Kenya">Kenya</option>
+                    <option value="United Kingdom (UK)">United Kingdom (UK)</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Germany">Germany</option>
+                    <option value="United Arab Emirates">United Arab Emirates</option>
+                    <option value="South Africa">South Africa</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="billingStreet1">Street address *</label>
+                  <input type="text" id="billingStreet1" placeholder="House number and street name" required>
+                  <input type="text" id="billingStreet2" placeholder="Apartment, suite, unit, etc. (optional)" style="margin-top: 8px;">
+                </div>
+
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label for="billingCity">Town / City *</label>
+                    <input type="text" id="billingCity" placeholder="Town / City" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="billingState">State / County (optional)</label>
+                    <input type="text" id="billingState" placeholder="State / County">
+                  </div>
+                </div>
+
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label for="billingPostcode">Postcode / ZIP (optional)</label>
+                    <input type="text" id="billingPostcode" placeholder="ZIP / Postcode">
+                  </div>
+                  <div class="form-group">
+                    <label for="customerPhone">Phone *</label>
+                    <div class="phone-input-group">
+                      <span class="country-code">+254</span>
+                      <input type="tel" id="customerPhone" placeholder="0712345678 or 712345678" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="billingEmail">Email address *</label>
+                  <input type="email" id="billingEmail" value="sneakersstoreoutfit7@gmail.com" placeholder="sneakersstoreoutfit7@gmail.com" required>
+                </div>
+              </div>
+
+              <!-- ADDITIONAL INFORMATION SECTION -->
+              <div class="billing-section" style="margin-top: 24px;">
+                <h2 class="billing-section-title">ADDITIONAL INFORMATION</h2>
+                <div class="form-group">
+                  <label for="orderNotes">Order Notes (optional)</label>
+                  <textarea id="orderNotes" rows="3" placeholder="Notes about your order, e.g. special notes for delivery."></textarea>
+                </div>
+              </div>
             </div>
-            <small>Format: 07XXXXXXXX, 01XXXXXXXX, or 7XXXXXXXX</small>
-          </div>
 
-          <div class="form-group">
-            <label for="customerName"><i class="fa-solid fa-user"></i> Full Name / Delivery Contact:</label>
-            <input type="text" id="customerName" placeholder="e.g. John Kamau" required>
-          </div>
+            <!-- RIGHT COLUMN: YOUR ORDER & SHIPMENT & PAYMENT -->
+            <div class="checkout-right-col">
+              <div class="checkout-summary-card">
+                <h2 class="billing-section-title">YOUR ORDER</h2>
+                
+                <div class="checkout-cart-list" id="checkoutCartItems">
+                  <!-- Dynamic order items rendered via app.js -->
+                </div>
 
-          <button type="submit" class="btn btn-mpesa btn-full btn-lg" id="sendStkBtn">
-            <i class="fa-solid fa-paper-plane"></i> Send STK Push Prompt
-          </button>
+                <div class="summary-line-row">
+                  <span>Subtotal</span>
+                  <strong id="checkoutSubtotal">KES 0</strong>
+                </div>
+
+                <div class="shipment-selection-box">
+                  <label class="shipment-title"><i class="fa-solid fa-truck"></i> Shipment</label>
+                  <div class="shipment-options-list">
+                    <label class="shipment-option active">
+                      <input type="radio" name="shippingMethod" value="standard" checked>
+                      <div class="shipment-details">
+                        <span class="shipment-name">Standard Delivery</span>
+                        <span class="shipment-time">2-7 Days</span>
+                      </div>
+                      <span class="shipment-fee">Free</span>
+                    </label>
+
+                    <label class="shipment-option">
+                      <input type="radio" name="shippingMethod" value="express">
+                      <div class="shipment-details">
+                        <span class="shipment-name">Express Delivery</span>
+                        <span class="shipment-time">24h: KES 200.00</span>
+                      </div>
+                      <span class="shipment-fee">KES 200.00</span>
+                    </label>
+
+                    <label class="shipment-option">
+                      <input type="radio" name="shippingMethod" value="pickup">
+                      <div class="shipment-details">
+                        <span class="shipment-name">Local pickup</span>
+                      </div>
+                      <span class="shipment-fee">Free</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="summary-line-row total-row">
+                  <span>TOTAL</span>
+                  <strong id="checkoutTotal">KES 0</strong>
+                </div>
+
+                <!-- PAYMENT METHOD SELECTION -->
+                <div class="payment-selection-box">
+                  <label class="payment-title"><i class="fa-solid fa-credit-card"></i> Payment Method</label>
+                  <div class="payment-options-list">
+                    <label class="payment-option active">
+                      <input type="radio" name="paymentMethod" value="mpesa" checked>
+                      <div class="payment-option-info">
+                        <span class="payment-name"><i class="fa-solid fa-mobile-retro" style="color: var(--mpesa-green);"></i> M-Pesa Express</span>
+                        <span class="payment-sub">Instant STK Push prompt on your phone</span>
+                      </div>
+                    </label>
+
+                    <label class="payment-option">
+                      <input type="radio" name="paymentMethod" value="card">
+                      <div class="payment-option-info">
+                        <span class="payment-name"><i class="fa-solid fa-credit-card" style="color: #60A5FA;"></i> Credit / Debit Card</span>
+                        <span class="payment-sub">Visa, Mastercard, AMEX</span>
+                      </div>
+                    </label>
+
+                    <label class="payment-option">
+                      <input type="radio" name="paymentMethod" value="cod">
+                      <div class="payment-option-info">
+                        <span class="payment-name"><i class="fa-solid fa-money-bill-wave" style="color: var(--gold-primary);"></i> Cash on Delivery</span>
+                        <span class="payment-sub">Pay in cash upon delivery</span>
+                      </div>
+                    </label>
+
+                    <label class="payment-option">
+                      <input type="radio" name="paymentMethod" value="bank">
+                      <div class="payment-option-info">
+                        <span class="payment-name"><i class="fa-solid fa-building-columns" style="color: #C084FC;"></i> Bank Transfer / PesaLink</span>
+                        <span class="payment-sub">Direct bank payment</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Dynamic Card Input Fields -->
+                  <div id="cardFieldsBox" class="card-fields-box" style="display: none;">
+                    <div class="form-group">
+                      <label for="cardNumber" style="font-size:0.8rem; margin-bottom:4px;">Card Number</label>
+                      <input type="text" id="cardNumber" placeholder="4532 •••• •••• 8892" style="font-size:0.85rem; padding:8px 10px;">
+                    </div>
+                    <div class="form-row-2col">
+                      <div class="form-group">
+                        <label for="cardExpiry" style="font-size:0.8rem; margin-bottom:4px;">Expiry (MM/YY)</label>
+                        <input type="text" id="cardExpiry" placeholder="12/28" style="font-size:0.85rem; padding:8px 10px;">
+                      </div>
+                      <div class="form-group">
+                        <label for="cardCvv" style="font-size:0.8rem; margin-bottom:4px;">CVV</label>
+                        <input type="password" id="cardCvv" placeholder="123" maxlength="4" style="font-size:0.85rem; padding:8px 10px;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Dynamic Bank Transfer Info -->
+                  <div id="bankInfoBox" class="bank-info-box" style="display: none;">
+                    <p>Bank: <strong>NCBA / KCB / Equity Bank</strong></p>
+                    <p>Paybill / Account: <strong>VIBE STORE 889900</strong></p>
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">After completing transfer, click Place Order to confirm.</p>
+                  </div>
+                </div>
+
+                <div class="checkout-email-badge">
+                  <i class="fa-solid fa-envelope"></i> Order receipt will be sent to <strong>sneakersstoreoutfit7@gmail.com</strong>
+                </div>
+
+                <button type="submit" class="btn btn-mpesa btn-full btn-lg" id="sendStkBtn" style="margin-top: 16px;">
+                  <i class="fa-solid fa-check-circle"></i> <span id="submitBtnText">Place Order &amp; Pay via M-Pesa</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
         </form>
       </div>
 
@@ -297,16 +480,36 @@
 
           <div class="receipt-details">
             <div class="receipt-row">
-              <span>M-Pesa Receipt Code:</span>
+              <span>M-Pesa / Order Code:</span>
               <strong id="receiptMpesaCode" class="mpesa-code-text">QK892719K</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Payment Method:</span>
+              <strong id="receiptPaymentMethod">M-Pesa Express</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Customer Name:</span>
+              <strong id="receiptCustomerName">John Kamau</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Customer Email:</span>
+              <strong id="receiptCustomerEmail">sneakersstoreoutfit7@gmail.com</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Phone:</span>
+              <strong id="receiptPhone">+254...</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Delivery Address:</span>
+              <strong id="receiptAddress">Nairobi, Kenya</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Shipment Option:</span>
+              <strong id="receiptShipping">Standard Delivery</strong>
             </div>
             <div class="receipt-row">
               <span>Amount Paid:</span>
               <strong id="receiptAmount">KES 0</strong>
-            </div>
-            <div class="receipt-row">
-              <span>Customer Phone:</span>
-              <strong id="receiptPhone">+254...</strong>
             </div>
             <div class="receipt-row">
               <span>Date &amp; Time:</span>
@@ -490,8 +693,12 @@
                   <tr>
                     <th>Date &amp; Time</th>
                     <th>Receipt Code</th>
-                    <th>Phone</th>
                     <th>Customer Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Town / Country</th>
+                    <th>Shipment</th>
+                    <th>Payment Method</th>
                     <th>Amount</th>
                     <th>Status</th>
                   </tr>
@@ -592,6 +799,15 @@
           <p>Have questions about sizing, drops, or delivery? Reach out to us directly!</p>
         </div>
         <div class="contact-grid">
+          <a href="mailto:sneakersstoreoutfit7@gmail.com" class="contact-item-box email-box">
+            <div class="contact-icon email-icon" style="background: rgba(229, 193, 88, 0.15); color: var(--gold-primary);"><i class="fa-solid fa-envelope"></i></div>
+            <div class="contact-info">
+              <h4>Email Support</h4>
+              <p>sneakersstoreoutfit7@gmail.com</p>
+              <span class="contact-action">Send Email &rarr;</span>
+            </div>
+          </a>
+
           <a href="tel:0103296216" class="contact-item-box">
             <div class="contact-icon call-icon"><i class="fa-solid fa-phone"></i></div>
             <div class="contact-info">
@@ -648,6 +864,7 @@
         <div class="footer-col contact-col">
           <h4><i class="fa-solid fa-envelope-open-text"></i> Contact Us</h4>
           <ul>
+            <li><a href="mailto:sneakersstoreoutfit7@gmail.com"><i class="fa-solid fa-envelope"></i> Email: sneakersstoreoutfit7@gmail.com</a></li>
             <li><a href="tel:0103296216"><i class="fa-solid fa-phone"></i> Phone: 0103 296 216</a></li>
             <li><a href="https://wa.me/254103296216" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp: 0103 296 216</a></li>
             <li><i class="fa-solid fa-location-dot"></i> Express Shipping Across Kenya</li>

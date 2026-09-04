@@ -316,7 +316,8 @@ app.get('/api/config', (req, res) => {
   // Mask sensitive credentials for safety when returning to client
   const safeConfig = {
     storeName: config.storeName || 'VIBE STREETWEAR & KICKS',
-    storePhone: config.storePhone || '+254 712 345 678',
+    storePhone: config.storePhone || '0103 296 216',
+    storeEmail: config.storeEmail || 'sneakersstoreoutfit7@gmail.com',
     currency: config.currency || 'KES',
     mpesaEnv: config.mpesa?.environment || 'sandbox',
     mpesaShortcode: config.mpesa?.shortcode || '174379',
@@ -348,7 +349,7 @@ app.post('/api/admin/config', (req, res) => {
 // Initiate M-Pesa STK Push
 app.post('/api/mpesa/stkpush', async (req, res) => {
   try {
-    const { phone, amount, items, customerName } = req.body;
+    const { phone, amount, items, customerName, email, billing, subtotal, shippingCost, shippingMethod } = req.body;
 
     if (!phone || !amount) {
       return res.status(400).json({ success: false, message: 'Phone number and amount are required' });
@@ -367,18 +368,47 @@ app.post('/api/mpesa/stkpush', async (req, res) => {
     const checkoutRequestId = 'ws_CO_' + timestamp + '_' + Math.floor(1000 + Math.random() * 9000);
     const mpesaReceiptNumber = 'Q' + Math.random().toString(36).substring(2, 6).toUpperCase() + Math.floor(100 + Math.random() * 900) + 'K';
 
+    const paymentMethod = req.body.paymentMethod || billing?.paymentMethod || 'mpesa';
+
     // Store in pending transactions table
     const orderData = {
       orderId: 'ORD-' + Date.now().toString().slice(-6),
       checkoutRequestId,
       phone: formattedPhone,
       amount: parseFloat(amount),
+      subtotal: parseFloat(subtotal || amount),
+      shippingCost: parseFloat(shippingCost || 0),
+      shippingMethod: shippingMethod || 'standard',
+      paymentMethod: paymentMethod,
       items: items || [],
-      customerName: customerName || 'Valued Customer',
-      status: 'PENDING',
-      mpesaReceiptNumber: null,
+      customerName: customerName || (billing ? `${billing.firstName} ${billing.lastName}` : 'Valued Customer'),
+      email: email || billing?.email || 'sneakersstoreoutfit7@gmail.com',
+      billing: billing || {
+        firstName: customerName || 'Valued',
+        lastName: 'Customer',
+        phone: formattedPhone,
+        email: email || 'sneakersstoreoutfit7@gmail.com',
+        country: 'United States (US)',
+        paymentMethod: paymentMethod
+      },
+      status: paymentMethod === 'mpesa' ? 'PENDING' : (paymentMethod === 'cod' ? 'CONFIRMED' : 'COMPLETED'),
+      mpesaReceiptNumber: paymentMethod === 'mpesa' ? null : (paymentMethod.toUpperCase() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase()),
       createdAt: new Date().toISOString()
     };
+
+    // If payment method is Card, COD, or Bank Transfer, save immediately to orders log
+    if (paymentMethod !== 'mpesa') {
+      const orders = readJson(ORDERS_FILE, []);
+      orders.unshift(orderData);
+      writeJson(ORDERS_FILE, orders);
+
+      return res.json({
+        success: true,
+        mode: 'instant',
+        order: orderData,
+        customerMessage: `Order placed successfully using ${paymentMethod.toUpperCase()}!`
+      });
+    }
 
     pendingMpesaTransactions.set(checkoutRequestId, orderData);
 
