@@ -765,15 +765,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- SAFARICOM M-PESA DARAJA & MULTI-PAYMENT CHECKOUT ---
   let selectedShippingMethod = 'standard';
-  let selectedPaymentMethod = 'mpesa';
+  let selectedPaymentMethod = 'whatsapp';
   const shippingRates = { standard: 0, express: 200, pickup: 0 };
 
   const paymentLabels = {
+    whatsapp: 'WhatsApp Direct Payment',
     mpesa: 'M-Pesa Express',
     card: 'Credit / Debit Card',
     cod: 'Cash on Delivery',
     bank: 'Bank Transfer / PesaLink'
   };
+
+  function buildWhatsAppUrl(orderData, targetPhone = '254103296216') {
+    const b = orderData.billing || {};
+    const items = orderData.items || cart || [];
+    const customerName = orderData.customerName || (b.firstName ? `${b.firstName} ${b.lastName}` : 'Valued Customer');
+    const phone = orderData.phone || b.phone || '';
+    const email = orderData.email || b.email || '';
+    const city = b.city ? `${b.city}, ${b.country || 'Kenya'}` : (b.country || 'Kenya');
+    const address = b.street1 ? `${b.street1}${b.street2 ? ', ' + b.street2 : ''}, ${city}` : city;
+    const orderNotes = b.orderNotes || '';
+
+    let itemsText = items.map((item, i) => {
+      const variant = item.color ? ` (Color: ${item.color}, Size: ${item.size})` : ` (Size: ${item.size})`;
+      return `${i + 1}. *${item.title}*${variant}\n   Qty: ${item.quantity} × KES ${item.price.toLocaleString()} = KES ${(item.price * item.quantity).toLocaleString()}`;
+    }).join('\n');
+
+    let shippingLabel = 'Standard Delivery';
+    if (orderData.shippingMethod === 'express' || b.shippingMethod === 'express') shippingLabel = 'Express Delivery (24h)';
+    else if (orderData.shippingMethod === 'pickup' || b.shippingMethod === 'pickup') shippingLabel = 'Local Pickup';
+
+    const subtotal = orderData.subtotal || items.reduce((s, item) => s + (item.price * item.quantity), 0);
+    const shippingCost = orderData.shippingCost || 0;
+    const totalAmount = orderData.amount || (subtotal + shippingCost);
+    const orderId = orderData.orderId || orderData.mpesaReceiptNumber || ('ORD-' + Date.now().toString().slice(-6));
+
+    let msg = `🛍️ *NEW ORDER - VIBE APPAREL & KICKS*\n`;
+    msg += `----------------------------------\n`;
+    msg += `🔖 *Order Ref:* ${orderId}\n`;
+    msg += `👤 *Customer:* ${customerName}\n`;
+    msg += `📞 *Phone:* +${phone}\n`;
+    if (email) msg += `✉️ *Email:* ${email}\n`;
+    msg += `📍 *Delivery Address:* ${address}\n`;
+    msg += `🚚 *Shipment:* ${shippingLabel}\n`;
+    if (orderNotes) msg += `📝 *Notes:* ${orderNotes}\n`;
+    msg += `----------------------------------\n`;
+    msg += `📦 *ORDER ITEMS:*\n${itemsText}\n`;
+    msg += `----------------------------------\n`;
+    msg += `💰 *Subtotal:* KES ${subtotal.toLocaleString()}\n`;
+    if (shippingCost > 0) msg += `🚚 *Shipping Fee:* KES ${shippingCost.toLocaleString()}\n`;
+    msg += `✨ *TOTAL PAYABLE:* KES ${totalAmount.toLocaleString()}\n`;
+    msg += `----------------------------------\n`;
+    msg += `Hello! I would like to pay for my order. Please send me your payment details to complete the payment. Thank you!`;
+
+    let cleanPhone = String(targetPhone).replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '254' + cleanPhone.substring(1);
+    if (!cleanPhone) cleanPhone = '254103296216';
+
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+  }
 
   function updateCheckoutTotals() {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -842,21 +892,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstName = document.getElementById('billingFirstName')?.value.trim() || '';
     const lastName = document.getElementById('billingLastName')?.value.trim() || '';
     const company = document.getElementById('billingCompany')?.value.trim() || '';
-    const country = document.getElementById('billingCountry')?.value || 'United States (US)';
+    const country = document.getElementById('billingCountry')?.value || 'Kenya';
     const street1 = document.getElementById('billingStreet1')?.value.trim() || '';
     const street2 = document.getElementById('billingStreet2')?.value.trim() || '';
     const city = document.getElementById('billingCity')?.value.trim() || '';
     const state = document.getElementById('billingState')?.value.trim() || '';
     const postcode = document.getElementById('billingPostcode')?.value.trim() || '';
-    const phoneInput = document.getElementById('customerPhone');
-    const phone = phoneInput ? phoneInput.value.trim() : '';
-    const email = document.getElementById('billingEmail')?.value.trim() || 'sneakersstoreoutfit7@gmail.com';
-    const orderNotes = document.getElementById('orderNotes')?.value.trim() || '';
 
-    if (!phone) {
+    const countryCodeSelect = document.getElementById('phoneCountryCode');
+    const selectedCode = countryCodeSelect ? countryCodeSelect.value : '+254';
+    const phoneInput = document.getElementById('customerPhone');
+    let rawPhone = phoneInput ? phoneInput.value.trim() : '';
+
+    if (!rawPhone) {
       alert('Please enter a valid phone number');
       return;
     }
+
+    let digitsOnly = rawPhone.replace(/\D/g, '');
+    if (digitsOnly.startsWith('0')) {
+      digitsOnly = digitsOnly.substring(1);
+    }
+    let cleanCode = selectedCode.replace(/\D/g, '');
+    if (!cleanCode) cleanCode = '254';
+    const phone = cleanCode + digitsOnly;
+
+    const email = document.getElementById('billingEmail')?.value.trim() || 'sneakersstoreoutfit7@gmail.com';
+    const orderNotes = document.getElementById('orderNotes')?.value.trim() || '';
+
     if (!firstName || !lastName) {
       alert('Please enter your First Name and Last Name');
       return;
@@ -873,12 +936,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sendBtn = document.getElementById('sendStkBtn');
     sendBtn.disabled = true;
+    sendBtn.innerHTML = `<i class="fa-brands fa-whatsapp fa-spin"></i> Preparing WhatsApp...`;
 
-    if (selectedPaymentMethod === 'mpesa') {
-      sendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Triggering M-Pesa STK Push...`;
-    } else {
-      sendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Order...`;
-    }
+    selectedPaymentMethod = 'whatsapp';
 
     try {
       const res = await fetch('/api/mpesa/stkpush', {
@@ -890,7 +950,7 @@ document.addEventListener('DOMContentLoaded', () => {
           subtotal,
           shippingCost: shippingFee,
           shippingMethod: selectedShippingMethod,
-          paymentMethod: selectedPaymentMethod,
+          paymentMethod: 'whatsapp',
           items: cart,
           customerName: fullName,
           email: email,
@@ -908,7 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
             email,
             orderNotes,
             shippingMethod: selectedShippingMethod,
-            paymentMethod: selectedPaymentMethod
+            paymentMethod: 'whatsapp'
           }
         })
       });
@@ -916,79 +976,46 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (data.success) {
-        if (selectedPaymentMethod === 'mpesa') {
-          // Transition to STK Push Wait Screen (Step 2)
-          mpesaStep1.style.display = 'none';
-          mpesaStep2.style.display = 'block';
+        const rawOrder = data.order || {
+          orderId: 'ORD-' + Date.now().toString().slice(-6),
+          phone: phone,
+          customerName: fullName,
+          email: email,
+          amount: totalAmount,
+          subtotal: subtotal,
+          shippingCost: shippingFee,
+          shippingMethod: selectedShippingMethod,
+          paymentMethod: 'whatsapp',
+          items: cart,
+          billing: { firstName, lastName, street1, street2, city, state, country, postcode, phone, email, orderNotes, shippingMethod: selectedShippingMethod }
+        };
 
-          if (data.mode === 'live') {
-            stkMessageText.innerHTML = `<strong style="color: #10B981;">LIVE SAFARICOM M-PESA:</strong> ${data.customerMessage}`;
-          } else {
-            stkMessageText.innerHTML = `<strong>STK Push Prompt Sent:</strong> ${data.customerMessage}<br><small style="color: var(--gold-primary); margin-top:6px; display:inline-block;">(Running in Simulator Mode. Add real Daraja keys in Admin Settings for live handset prompts)</small>`;
-          }
+        const waUrl = buildWhatsAppUrl(rawOrder, data.storePhone || '254103296216');
 
-          // Start 30s Countdown
-          let seconds = 30;
-          stkCountdown.textContent = seconds;
+        // Open WhatsApp chat in new tab
+        window.open(waUrl, '_blank');
 
-          if (stkPollInterval) clearInterval(stkPollInterval);
+        // Show confirmation receipt with direct WhatsApp button
+        mpesaStep1.style.display = 'none';
+        showReceipt(rawOrder, waUrl);
 
-          stkPollInterval = setInterval(async () => {
-            seconds--;
-            stkCountdown.textContent = seconds;
-
-            // Poll status endpoint
-            try {
-              const statusRes = await fetch(`/api/mpesa/status/${data.checkoutRequestId}`);
-              if (statusRes.ok) {
-                const statusData = await statusRes.json();
-                if (statusData.status === 'COMPLETED') {
-                  clearInterval(stkPollInterval);
-                  showReceipt(statusData);
-                }
-              }
-            } catch (pollErr) {
-              console.warn('Error polling STK status:', pollErr);
-            }
-
-            if (seconds <= 0) {
-              clearInterval(stkPollInterval);
-              alert('M-Pesa payment prompt timed out or was not confirmed. Please try again.');
-              mpesaStep1.style.display = 'block';
-              mpesaStep2.style.display = 'none';
-              sendBtn.disabled = false;
-              sendBtn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Place Order &amp; Pay via M-Pesa`;
-            }
-          }, 1000);
-        } else {
-          // Instant Order Receipt for Card, Cash on Delivery, and Bank Transfer
-          mpesaStep1.style.display = 'none';
-          showReceipt(data.order || {
-            mpesaReceiptNumber: (selectedPaymentMethod.toUpperCase()) + '-' + Date.now().toString().slice(-6),
-            amount: totalAmount,
-            phone: phone,
-            customerName: fullName,
-            email: email,
-            billing: {
-              firstName, lastName, city, country, shippingMethod: selectedShippingMethod, paymentMethod: selectedPaymentMethod
-            }
-          });
-        }
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `<i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> Proceed to WhatsApp Payment`;
 
       } else {
         alert(data.message || 'Failed to place order. Please check your details and try again.');
         sendBtn.disabled = false;
-        sendBtn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Place Order`;
+        sendBtn.innerHTML = `<i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> Proceed to WhatsApp Payment`;
       }
 
     } catch (err) {
       alert('Network Error placing order: ' + err.message);
       sendBtn.disabled = false;
-      sendBtn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Place Order`;
+      sendBtn.innerHTML = `<i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> Proceed to WhatsApp Payment`;
     }
   }
 
-  function showReceipt(orderData) {
+  function showReceipt(orderData, customWaUrl = null) {
     mpesaStep1.style.display = 'none';
     mpesaStep2.style.display = 'none';
     mpesaStep3.style.display = 'block';
@@ -997,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const customerName = orderData.customerName || (b.firstName ? `${b.firstName} ${b.lastName}` : 'Valued Customer');
     const customerEmail = orderData.email || b.email || 'sneakersstoreoutfit7@gmail.com';
     const cityCountry = b.city ? `${b.city}, ${b.country || 'Kenya'}` : (b.country || 'Kenya');
-    const payMethod = orderData.paymentMethod || b.paymentMethod || 'mpesa';
+    const payMethod = orderData.paymentMethod || b.paymentMethod || 'whatsapp';
 
     let shippingLabel = 'Standard Delivery (2-7 Days)';
     if (b.shippingMethod === 'express' || orderData.shippingMethod === 'express') {
@@ -1016,6 +1043,17 @@ document.addEventListener('DOMContentLoaded', () => {
     receiptAmount.textContent = `KES ${(orderData.amount || 0).toLocaleString()}`;
     receiptPhone.textContent = `+${orderData.phone}`;
     receiptTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toLocaleDateString();
+
+    const reopenWhatsappBtn = document.getElementById('reopenWhatsappBtn');
+    if (reopenWhatsappBtn) {
+      if (payMethod === 'whatsapp' || customWaUrl) {
+        const waLink = customWaUrl || buildWhatsAppUrl(orderData, '254103296216');
+        reopenWhatsappBtn.href = waLink;
+        reopenWhatsappBtn.style.display = 'flex';
+      } else {
+        reopenWhatsappBtn.style.display = 'none';
+      }
+    }
 
     // Clear Shopping Cart
     cart = [];
@@ -1682,35 +1720,79 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Payment Method radio change listener
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        selectedPaymentMethod = e.target.value;
-        document.querySelectorAll('.payment-option').forEach(opt => {
-          const r = opt.querySelector('input[type="radio"]');
-          opt.classList.toggle('active', r && r.checked);
-        });
+    // Auto-sync country selection with phone country code
+    const countryCodeMap = {
+      'Kenya': '+254',
+      'United States (US)': '+1',
+      'United Kingdom (UK)': '+44',
+      'Canada': '+1',
+      'Australia': '+61',
+      'Nigeria': '+234',
+      'South Africa': '+27',
+      'Uganda': '+256',
+      'Tanzania': '+255',
+      'Rwanda': '+250',
+      'Ghana': '+233',
+      'Ethiopia': '+251',
+      'Somalia': '+252',
+      'South Sudan': '+211',
+      'Egypt': '+20',
+      'Morocco': '+212',
+      'United Arab Emirates (UAE)': '+971',
+      'Saudi Arabia': '+966',
+      'Qatar': '+974',
+      'Kuwait': '+965',
+      'Oman': '+968',
+      'Bahrain': '+973',
+      'Germany': '+49',
+      'France': '+33',
+      'Italy': '+39',
+      'Spain': '+34',
+      'Netherlands': '+31',
+      'Belgium': '+32',
+      'Switzerland': '+41',
+      'Sweden': '+46',
+      'Norway': '+47',
+      'Denmark': '+45',
+      'Finland': '+358',
+      'Poland': '+48',
+      'Portugal': '+351',
+      'Ireland': '+353',
+      'Austria': '+43',
+      'Greece': '+30',
+      'Turkey': '+90',
+      'India': '+91',
+      'China': '+86',
+      'Japan': '+81',
+      'South Korea': '+82',
+      'Singapore': '+65',
+      'Malaysia': '+60',
+      'Indonesia': '+62',
+      'Thailand': '+66',
+      'Vietnam': '+84',
+      'Philippines': '+63',
+      'Pakistan': '+92',
+      'Bangladesh': '+880',
+      'Sri Lanka': '+94',
+      'Brazil': '+55',
+      'Mexico': '+52',
+      'Argentina': '+54',
+      'Colombia': '+57',
+      'Chile': '+56',
+      'Peru': '+51',
+      'New Zealand': '+64'
+    };
 
-        const cardFieldsBox = document.getElementById('cardFieldsBox');
-        const bankInfoBox = document.getElementById('bankInfoBox');
-        const submitBtnText = document.getElementById('submitBtnText');
-
-        if (cardFieldsBox) cardFieldsBox.style.display = selectedPaymentMethod === 'card' ? 'block' : 'none';
-        if (bankInfoBox) bankInfoBox.style.display = selectedPaymentMethod === 'bank' ? 'block' : 'none';
-
-        if (submitBtnText) {
-          if (selectedPaymentMethod === 'mpesa') {
-            submitBtnText.textContent = 'Place Order & Pay via M-Pesa';
-          } else if (selectedPaymentMethod === 'card') {
-            submitBtnText.textContent = 'Place Order with Credit / Debit Card';
-          } else if (selectedPaymentMethod === 'cod') {
-            submitBtnText.textContent = 'Place Order (Pay on Delivery)';
-          } else if (selectedPaymentMethod === 'bank') {
-            submitBtnText.textContent = 'Place Order (Bank Transfer)';
-          }
+    const billingCountrySelect = document.getElementById('billingCountry');
+    const phoneCodeSelect = document.getElementById('phoneCountryCode');
+    if (billingCountrySelect && phoneCodeSelect) {
+      billingCountrySelect.addEventListener('change', (e) => {
+        const code = countryCodeMap[e.target.value];
+        if (code) {
+          phoneCodeSelect.value = code;
         }
       });
-    });
+    }
 
     // M-Pesa Modal
     closeMpesaModal.addEventListener('click', () => mpesaModal.classList.remove('active'));

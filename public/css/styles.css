@@ -1112,6 +1112,66 @@ input:checked + .slider:before {
   border-right: 1px solid var(--border-color);
 }
 
+.country-code-select {
+  padding: 12px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+  color: var(--gold-primary);
+  border: none;
+  border-right: 1px solid var(--border-color);
+  font-size: 0.88rem;
+  outline: none;
+  cursor: pointer;
+  max-width: 160px;
+}
+
+.country-code-select option {
+  background: #141414;
+  color: #ffffff;
+  font-size: 0.88rem;
+}
+
+.whatsapp-only-card {
+  background: rgba(37, 211, 102, 0.08);
+  border: 1.5px solid rgba(37, 211, 102, 0.4);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.whatsapp-card-icon {
+  width: 46px;
+  height: 46px;
+  background: rgba(37, 211, 102, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.whatsapp-card-icon i {
+  color: #25D366;
+  font-size: 1.8rem;
+}
+
+.whatsapp-card-text h4 {
+  margin: 0;
+  color: #25D366;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.whatsapp-card-text p {
+  margin: 4px 0 0;
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
 .phone-input-group input {
   flex: 1;
   padding: 14px;

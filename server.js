@@ -391,12 +391,12 @@ app.post('/api/mpesa/stkpush', async (req, res) => {
         country: 'United States (US)',
         paymentMethod: paymentMethod
       },
-      status: paymentMethod === 'mpesa' ? 'PENDING' : (paymentMethod === 'cod' ? 'CONFIRMED' : 'COMPLETED'),
-      mpesaReceiptNumber: paymentMethod === 'mpesa' ? null : (paymentMethod.toUpperCase() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase()),
+      status: paymentMethod === 'mpesa' ? 'PENDING' : (paymentMethod === 'whatsapp' ? 'WHATSAPP_PENDING' : (paymentMethod === 'cod' ? 'CONFIRMED' : 'COMPLETED')),
+      mpesaReceiptNumber: paymentMethod === 'mpesa' ? null : ((paymentMethod === 'whatsapp' ? 'WA' : paymentMethod.toUpperCase()) + '-' + Math.random().toString(36).substring(2, 8).toUpperCase()),
       createdAt: new Date().toISOString()
     };
 
-    // If payment method is Card, COD, or Bank Transfer, save immediately to orders log
+    // If payment method is not M-Pesa (Card, COD, Bank, WhatsApp), save immediately to orders log
     if (paymentMethod !== 'mpesa') {
       const orders = readJson(ORDERS_FILE, []);
       orders.unshift(orderData);
@@ -406,7 +406,10 @@ app.post('/api/mpesa/stkpush', async (req, res) => {
         success: true,
         mode: 'instant',
         order: orderData,
-        customerMessage: `Order placed successfully using ${paymentMethod.toUpperCase()}!`
+        storePhone: config.storePhone || '254103296216',
+        customerMessage: paymentMethod === 'whatsapp'
+          ? 'Order saved! Redirecting to WhatsApp for payment details...'
+          : `Order placed successfully using ${paymentMethod.toUpperCase()}!`
       });
     }
 

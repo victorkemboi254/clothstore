@@ -1,5 +1,86 @@
 [
   {
+    "orderId": "ORD-478244",
+    "checkoutRequestId": "ws_CO_20260907161118_3736",
+    "phone": "254728380394",
+    "amount": 15100,
+    "subtotal": 14900,
+    "shippingCost": 200,
+    "shippingMethod": "express",
+    "paymentMethod": "whatsapp",
+    "items": [
+      {
+        "id": "prod_3",
+        "title": "Stussy 8-Ball Graphic Black Tee",
+        "price": 2200,
+        "image": "/assets/images/stussy_black_tee.jpg",
+        "category": "T-Shirts",
+        "size": "S",
+        "quantity": 1
+      },
+      {
+        "id": "prod_2",
+        "title": "Stussy 8-Ball Vintage Brown Tee",
+        "price": 2200,
+        "image": "/assets/images/stussy_brown_tee.jpg",
+        "category": "T-Shirts",
+        "size": "S",
+        "quantity": 1
+      },
+      {
+        "id": "prod_11",
+        "title": "Minimalist Cable Knit Cream Sweater",
+        "price": 3800,
+        "image": "assets/images/cream_sweater.jpg",
+        "category": "Sweaters & Hoodies",
+        "size": "S",
+        "color": "Cream White",
+        "quantity": 1
+      },
+      {
+        "id": "prod_6",
+        "title": "Los Angeles L.A. 3-Piece Track Set & Cap",
+        "price": 4200,
+        "image": "assets/images/la_shortset_red.jpg",
+        "category": "Sets & Suits",
+        "size": "M",
+        "color": "Bold Red",
+        "quantity": 1
+      },
+      {
+        "id": "prod_1",
+        "title": "Chrome Hearts Cross Rhinestone Luxury Tee",
+        "price": 2500,
+        "image": "assets/images/chrome_hearts_black_tee.jpg",
+        "category": "T-Shirts",
+        "size": "S",
+        "color": "Midnight Black",
+        "quantity": 1
+      }
+    ],
+    "customerName": "Victor Kemboi",
+    "email": "kemboiv233@gmail.com",
+    "billing": {
+      "firstName": "Victor",
+      "lastName": "Kemboi",
+      "company": "",
+      "country": "Kenya",
+      "street1": "7284",
+      "street2": "",
+      "city": "Eldoret",
+      "state": "",
+      "postcode": "30100",
+      "phone": "254728380394",
+      "email": "kemboiv233@gmail.com",
+      "orderNotes": "",
+      "shippingMethod": "express",
+      "paymentMethod": "whatsapp"
+    },
+    "status": "WHATSAPP_PENDING",
+    "mpesaReceiptNumber": "WA-JYB199",
+    "createdAt": "2026-09-07T16:11:18.244Z"
+  },
+  {
     "orderId": "ORD-964773",
     "checkoutRequestId": "ws_CO_20260730191604_2307",
     "phone": "254712345678",
