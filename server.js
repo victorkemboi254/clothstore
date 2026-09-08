@@ -137,7 +137,12 @@ app.post('/api/products', upload.any(), (req, res) => {
     }
   }
 
-  images = [...uploadedPaths, ...images];
+  const remoteImages = images.filter(img => typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://')));
+  if (remoteImages.length > 0) {
+    images = remoteImages;
+  } else {
+    images = [...uploadedPaths, ...images];
+  }
   images = images.map(img => saveBase64ToFile(img)).filter(Boolean);
 
   let imageUrl = req.body.imageUrl ? saveBase64ToFile(req.body.imageUrl) : '';
@@ -236,7 +241,14 @@ app.put('/api/products/:id', upload.any(), (req, res) => {
       images = req.body.images;
     }
   }
-  images = [...uploadedPaths, ...images].map(img => saveBase64ToFile(img)).filter(Boolean);
+
+  const remoteImages = images.filter(img => typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://')));
+  if (remoteImages.length > 0) {
+    images = remoteImages;
+  } else {
+    images = [...uploadedPaths, ...images];
+  }
+  images = images.map(img => saveBase64ToFile(img)).filter(Boolean);
 
   let imageUrl = req.body.imageUrl ? saveBase64ToFile(req.body.imageUrl) : existing.image;
   if (!imageUrl && images.length > 0) imageUrl = images[0];
@@ -319,6 +331,10 @@ app.get('/api/config', (req, res) => {
     storePhone: config.storePhone || '0103 296 216',
     storeEmail: config.storeEmail || 'sneakersstoreoutfit7@gmail.com',
     currency: config.currency || 'KES',
+    cloudinary: {
+      cloudName: config.cloudinary?.cloudName || 'yvbo2mtt',
+      uploadPreset: config.cloudinary?.uploadPreset || 'clothstore_preset'
+    },
     mpesaEnv: config.mpesa?.environment || 'sandbox',
     mpesaShortcode: config.mpesa?.shortcode || '174379',
     hasCredentials: Boolean(config.mpesa?.consumerKey && config.mpesa.consumerKey !== 'YOUR_CONSUMER_KEY')
@@ -332,6 +348,13 @@ app.post('/api/admin/config', (req, res) => {
   if (req.body.storeName) config.storeName = req.body.storeName;
   if (req.body.adminPassword) config.adminPassword = req.body.adminPassword;
   
+  if (req.body.cloudinary) {
+    config.cloudinary = {
+      ...config.cloudinary,
+      ...req.body.cloudinary
+    };
+  }
+
   if (req.body.mpesa) {
     config.mpesa = {
       ...config.mpesa,

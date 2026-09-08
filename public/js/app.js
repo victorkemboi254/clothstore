@@ -226,120 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const ordersTableBody = document.getElementById('ordersTableBody');
   const darajaConfigForm = document.getElementById('darajaConfigForm');
 
-  const DEFAULT_PRODUCTS = [
-    {
-      "id": "prod_1",
-      "title": "Chrome Hearts Cross Rhinestone Luxury Tee",
-      "category": "T-Shirts",
-      "price": 2500,
-      "image": "assets/images/chrome_hearts_black_tee.jpg",
-      "images": [
-        "assets/images/chrome_hearts_black_tee.jpg",
-        "assets/images/chrome_hearts_blue_tee.jpg"
-      ],
-      "colors": [
-        { "name": "Midnight Black", "hex": "#111111", "image": "assets/images/chrome_hearts_black_tee.jpg" },
-        { "name": "Royal Blue", "hex": "#1E3A8A", "image": "assets/images/chrome_hearts_blue_tee.jpg" }
-      ],
-      "description": "Oversized luxury heavyweight cotton t-shirt featuring Chrome Hearts front chest logo and iconic cross crystal print back.",
-      "sizes": ["S", "M", "L", "XL", "XXL"],
-      "inStock": true,
-      "stockQty": 15,
-      "featured": true,
-      "tags": ["Streetwear", "Bestseller", "New"]
-    },
-    {
-      "id": "prod_2",
-      "title": "Stussy 8-Ball Vintage Graphic Tee",
-      "category": "T-Shirts",
-      "price": 2200,
-      "image": "assets/images/stussy_brown_tee.jpg",
-      "images": [
-        "assets/images/stussy_brown_tee.jpg",
-        "assets/images/stussy_black_tee.jpg",
-        "assets/images/stussy_white_tee.jpg"
-      ],
-      "colors": [
-        { "name": "Vintage Brown", "hex": "#4A2E1B", "image": "assets/images/stussy_brown_tee.jpg" },
-        { "name": "Washed Black", "hex": "#1A1A1A", "image": "assets/images/stussy_black_tee.jpg" },
-        { "name": "Fresh White", "hex": "#FFFFFF", "image": "assets/images/stussy_white_tee.jpg" }
-      ],
-      "description": "Classic streetwear tee with pink Stussy script logo and signature 8-ball graphic print.",
-      "sizes": ["S", "M", "L", "XL"],
-      "inStock": true,
-      "stockQty": 25,
-      "featured": true,
-      "tags": ["Vintage", "Popular"]
-    },
-    {
-      "id": "prod_6",
-      "title": "Los Angeles L.A. 3-Piece Track Set & Cap",
-      "category": "Sets & Suits",
-      "price": 4200,
-      "image": "assets/images/la_shortset_red.jpg",
-      "images": [
-        "assets/images/la_shortset_red.jpg",
-        "assets/images/la_shortset_black.jpg",
-        "assets/images/la_shortset_brown.jpg"
-      ],
-      "colors": [
-        { "name": "Bold Red", "hex": "#DC2626", "image": "assets/images/la_shortset_red.jpg" },
-        { "name": "Midnight Black", "hex": "#111827", "image": "assets/images/la_shortset_black.jpg" },
-        { "name": "Mocha Brown", "hex": "#6B4636", "image": "assets/images/la_shortset_brown.jpg" }
-      ],
-      "description": "3-Piece Premium Streetwear Set: Oversized embroidered Los Angeles t-shirt, matching drawstring shorts, and crisp white LA baseball cap.",
-      "sizes": ["M", "L", "XL", "XXL"],
-      "inStock": true,
-      "stockQty": 20,
-      "featured": true,
-      "tags": ["3-Piece Set", "Trending"]
-    },
-    {
-      "id": "prod_9",
-      "title": "Air Jordan 1 High Bred Retro Kicks",
-      "category": "Shoes & Kicks",
-      "price": 6800,
-      "image": "assets/images/jordan_sneaker.jpg",
-      "images": ["assets/images/jordan_sneaker.jpg"],
-      "colors": [{ "name": "Bred Red/Black", "hex": "#991B1B", "image": "assets/images/jordan_sneaker.jpg" }],
-      "description": "Iconic high-top premium leather sneakers in classic black and varsity red colorway with signature swoosh and cushioned sole.",
-      "sizes": ["EU 40", "EU 41", "EU 42", "EU 43", "EU 44", "EU 45"],
-      "inStock": true,
-      "stockQty": 11,
-      "featured": true,
-      "tags": ["Kicks", "Retro", "Limited"]
-    },
-    {
-      "id": "prod_10",
-      "title": "Nike Dunk Low Forest Green Kicks",
-      "category": "Shoes & Kicks",
-      "price": 5900,
-      "image": "assets/images/dunk_sneaker.jpg",
-      "images": ["assets/images/dunk_sneaker.jpg"],
-      "colors": [{ "name": "Forest Green", "hex": "#15803D", "image": "assets/images/dunk_sneaker.jpg" }],
-      "description": "Stylish low-top leather sneakers with white panels and forest green overlays. Ultimate everyday streetwear sneaker.",
-      "sizes": ["EU 40", "EU 41", "EU 42", "EU 43", "EU 44"],
-      "inStock": true,
-      "stockQty": 7,
-      "featured": false,
-      "tags": ["Low Top", "Green"]
-    },
-    {
-      "id": "prod_11",
-      "title": "Minimalist Cable Knit Cream Sweater",
-      "category": "Sweaters & Hoodies",
-      "price": 3800,
-      "image": "assets/images/cream_sweater.jpg",
-      "images": ["assets/images/cream_sweater.jpg"],
-      "colors": [{ "name": "Cream White", "hex": "#FEF3C7", "image": "assets/images/cream_sweater.jpg" }],
-      "description": "Cozy luxury oversized cable knit sweater crafted from soft heavy wool blend in a timeless cream white tone.",
-      "sizes": ["S", "M", "L", "XL"],
-      "inStock": true,
-      "stockQty": 6,
-      "featured": false,
-      "tags": ["Sweaters", "Luxury Knit"]
-    }
-  ];
+  const DEFAULT_PRODUCTS = [];
 
   function compressImageFile(file, maxWidth = 800, maxHeight = 800, quality = 0.75) {
     return new Promise((resolve) => {
@@ -530,6 +417,39 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filtered.length === 0) {
       productGrid.style.display = 'none';
       noResults.style.display = 'block';
+      if (products.length === 0) {
+        noResults.innerHTML = `
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--gold-primary); margin-bottom: 12px;"></i>
+          <h3>No Product Listings Available</h3>
+          <p>The store is ready for your fresh catalog. Log into the Admin Portal to add products hosted permanently on Cloudinary!</p>
+          <button class="btn btn-primary" id="openAdminFromEmptyBtn" style="margin-top: 14px;"><i class="fa-solid fa-user-shield"></i> Open Admin Portal</button>
+        `;
+        const openBtn = document.getElementById('openAdminFromEmptyBtn');
+        if (openBtn) {
+          openBtn.addEventListener('click', () => {
+            const adminModal = document.getElementById('adminModal');
+            if (adminModal) adminModal.style.display = 'flex';
+          });
+        }
+      } else {
+        noResults.innerHTML = `
+          <i class="fa-solid fa-shirt-long-slash"></i>
+          <h3>No items found matching your filter</h3>
+          <p>Try searching for a different keyword or category.</p>
+          <button class="btn btn-outline" id="resetFiltersBtn">Reset All Filters</button>
+        `;
+        const resetBtn = document.getElementById('resetFiltersBtn');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            activeCategory = 'All';
+            searchQuery = '';
+            inStockOnly = false;
+            sortBy = 'featured';
+            if (searchInput) searchInput.value = '';
+            renderCatalog();
+          });
+        }
+      }
     } else {
       noResults.style.display = 'none';
       productGrid.style.display = 'grid';
@@ -1338,19 +1258,22 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('tags', JSON.stringify(tags));
       formData.append('featured', featured);
 
-      // Attach actual binary File objects to FormData so Multer on server saves them to /uploads/
-      if (filesToProcess.length > 0) {
-        for (let i = 0; i < filesToProcess.length; i++) {
-          formData.append('files', filesToProcess[i]);
-        }
-      }
-      if (colorRows && colorRows.length > 0) {
-        colorRows.forEach(row => {
-          const cFileInput = row.querySelector('.cvar-file');
-          if (cFileInput && cFileInput.files && cFileInput.files.length > 0) {
-            formData.append('files', cFileInput.files[0]);
+      // Only attach raw files to FormData if Cloudinary hosted URLs are not available
+      const hasCloudinaryUrls = uploadedImages.some(img => typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://')));
+      if (!hasCloudinaryUrls) {
+        if (filesToProcess.length > 0) {
+          for (let i = 0; i < filesToProcess.length; i++) {
+            formData.append('files', filesToProcess[i]);
           }
-        });
+        }
+        if (colorRows && colorRows.length > 0) {
+          colorRows.forEach(row => {
+            const cFileInput = row.querySelector('.cvar-file');
+            if (cFileInput && cFileInput.files && cFileInput.files.length > 0) {
+              formData.append('files', cFileInput.files[0]);
+            }
+          });
+        }
       }
 
       let createdProduct = null;
@@ -1490,15 +1413,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('cfgEnv')) document.getElementById('cfgEnv').value = cfg.mpesaEnv || 'sandbox';
         if (document.getElementById('cfgShortcode')) document.getElementById('cfgShortcode').value = cfg.mpesaShortcode || '174379';
         if (document.getElementById('cfgStoreName')) document.getElementById('cfgStoreName').value = cfg.storeName || 'VIBE APPAREL & KICKS';
+        if (cfg.cloudinary) {
+          if (cfg.cloudinary.cloudName) {
+            localStorage.setItem('vibe_cloudinary_cloud_name', cfg.cloudinary.cloudName);
+            if (document.getElementById('cfgCloudinaryCloudName')) {
+              document.getElementById('cfgCloudinaryCloudName').value = cfg.cloudinary.cloudName;
+            }
+          }
+          if (cfg.cloudinary.uploadPreset) {
+            localStorage.setItem('vibe_cloudinary_preset', cfg.cloudinary.uploadPreset);
+            if (document.getElementById('cfgCloudinaryPreset')) {
+              document.getElementById('cfgCloudinaryPreset').value = cfg.cloudinary.uploadPreset;
+            }
+          }
+        }
       }
     } catch (err) {
       console.warn('Failed to load config:', err);
     }
 
-    if (document.getElementById('cfgCloudinaryCloudName')) {
+    if (document.getElementById('cfgCloudinaryCloudName') && !document.getElementById('cfgCloudinaryCloudName').value) {
       document.getElementById('cfgCloudinaryCloudName').value = localStorage.getItem('vibe_cloudinary_cloud_name') || 'yvbo2mtt';
     }
-    if (document.getElementById('cfgCloudinaryPreset')) {
+    if (document.getElementById('cfgCloudinaryPreset') && !document.getElementById('cfgCloudinaryPreset').value) {
       document.getElementById('cfgCloudinaryPreset').value = localStorage.getItem('vibe_cloudinary_preset') || 'clothstore_preset';
     }
   }
